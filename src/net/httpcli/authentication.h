@@ -7,7 +7,7 @@
 
 namespace HttpCli {
 
-class Authentication {
+class authentication {
 
 };
 } //namespace HttpCli

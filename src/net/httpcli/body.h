@@ -2,13 +2,14 @@
 // Created by admin on 2021/1/10.
 //
 
-#ifndef TEST_URL_H
-#define TEST_URL_H
-
+#ifndef TEST_BODY_H
+#define TEST_BODY_H
 namespace HttpCli {
-class Url {
+
+class body {
 
 };
 } //namespace HttpCli
 
-#endif //TEST_URL_H
+
+#endif //TEST_BODY_H

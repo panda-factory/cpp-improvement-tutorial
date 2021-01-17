@@ -8,7 +8,7 @@
 namespace HttpCli {
 
 struct Parameters {
-
+    std::string content;
 };
 
 } // namespace HttpCli

@@ -1,11 +1,15 @@
+add_compile_options("/std:c++17")
 
-SET(BOOST_ROOT "${PROJECT_SOURCE_DIR}/third_party/boost_1_75_0")
+# For Openssl
+SET(OPENSSL_ROOT_DIR "${PROJECT_SOURCE_DIR}/third_party/openssl-1.1.1i")
+FIND_PACKAGE(OpenSSL REQUIRED)
+INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
 
-FIND_PACKAGE(Boost COMPONENTS COMPONENTS
-    # regex
-    filesystem   # 我的工程中只使用了 boost 的 filesystem 功能,因此这里只有一个组件
-    )
 
-IF(NOT Boost_FOUND)
-    MESSAGE("Not found Boost with root: " + ${BOOST_ROOT})
-ENDIF()
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(${HTTP_CLI_DIR})
+
+SET(HTTP_CLI_IMPL_SRC
+    session_impl_beast.cpp)
+
+ADD_LIBRARY(http_cli_impl STATIC ${HTTP_CLI_IMPL_SRC})

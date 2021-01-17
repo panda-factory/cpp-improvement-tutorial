@@ -5,16 +5,15 @@
 #ifndef TEST_SESSION_H
 #define TEST_SESSION_H
 
-#include "net/httpcli/SessionImpl.h"
+#include "net/httpcli/session_impl.h"
 
 namespace HttpCli {
 
 class Session {
 public:
-
     inline void SetUrl(const Url &url);
 
-    inline void SetParameters(const Parameters &parameters);
+    inline void SetParameters(const Parameters& parameters);
 
     inline void SetParameters(Parameters &&parameters);
 
@@ -22,7 +21,7 @@ public:
 
     inline void SetTimeout(const Timeout &timeout);
 
-    inline void SetAuth(const Authentication &auth);
+    inline void SetAuth(const authentication &auth);
 
     inline void SetDigest(const Digest &auth);
 
@@ -36,9 +35,9 @@ public:
 
     inline void SetCookies(const Cookies &cookies);
 
-    inline void SetBody(Body &&body);
+    inline void SetBody(body &&body);
 
-    inline void SetBody(const Body &body);
+    inline void SetBody(const body &body);
 
     // Used in templated functions
     inline void SetOption(const Url &url);
@@ -51,7 +50,7 @@ public:
 
     inline void SetOption(const Timeout &timeout);
 
-    inline void SetOption(const Authentication &auth);
+    inline void SetOption(const authentication &auth);
 
     inline void SetOption(const Digest &auth);
 
@@ -65,26 +64,14 @@ public:
 
     inline void SetOption(const Cookies &cookies);
 
-    inline void SetOption(Body &&body);
+    inline void SetOption(body &&body);
 
-    inline void SetOption(const Body &body);
+    inline void SetOption(const body &body);
 
     template<class H>
     inline void SetOption(const Handler <H> &&on_response);
 
-    inline void DELETE_();
-
-    inline void GET();
-
-    inline void HEAD();
-
-    inline void OPTIONS();
-
-    inline void PATCH();
-
-    inline void POST();
-
-    inline void PUT();
+    inline void Request();
 
     Session() = default;
 

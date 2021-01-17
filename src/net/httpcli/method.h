@@ -4,9 +4,15 @@
 
 #ifndef TEST_METHOD_H
 #define TEST_METHOD_H
+
+#include <string>
+
 namespace HttpCli {
 
-class Method {
+struct Method {
+public:
+    std::string content;
+private:
 
 };
 } //namespace HttpCli
