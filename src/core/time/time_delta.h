@@ -12,7 +12,7 @@
 #include <iosfwd>
 #include <limits>
 
-namespace Core {
+namespace core {
 using namespace std::chrono_literals;
 
 using Milliseconds = std::chrono::duration<double, std::milli>;
@@ -122,6 +122,6 @@ private:
     int64_t delta_ = 0;
 };
 
-} // namespace Core
+} // namespace core
 
 #endif //TEST_TIMEDELTA_H

@@ -10,7 +10,7 @@
 
 #include "time_delta.h"
 
-namespace Core {
+namespace core {
 // A TimePoint represents a point in time represented as an integer number of
 // nanoseconds elapsed since an arbitrary point in the past.
 //
@@ -68,6 +68,6 @@ private:
 
     int64_t ticks_ = 0;
 };
-} // namespace Core
+} // namespace core
 
 #endif //TEST_TIME_POINT_H

@@ -1,2 +1,2 @@
 
-ADD_SUBDIRECTORY(httpcli)
+ADD_SUBDIRECTORY(http_cli)

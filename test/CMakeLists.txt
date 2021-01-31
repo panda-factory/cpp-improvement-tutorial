@@ -1,20 +1,26 @@
-find_package(GTestSrc)
 
-if(GTESTSRC_FOUND)
+SET(GTEST_ROOT ${PROJECT_SOURCE_DIR}/third_party/googletest-1.10.0/googletest)
+
+FIND_PACKAGE(GTestSrc REQUIRED)
+
+IF(GTESTSRC_FOUND)
     enable_testing()
 
-    if (WIN32 AND (NOT CYGWIN) AND (NOT MINGW))
-        set(gtest_disable_pthreads ON)
-        set(gtest_force_shared_crt ON)
-    endif()
+    IF (WIN32 AND (NOT CYGWIN) AND (NOT MINGW))
+        SET(gtest_disable_pthreads ON)
+        SET(gtest_force_shared_crt ON)
+    ENDIF()
 
-    add_subdirectory(${GTEST_SOURCE_DIR} ${CMAKE_BINARY_DIR}/googletest)
-    include_directories(SYSTEM ${GTEST_INCLUDE_DIR})
 
-    set(TEST_LIBRARIES gtest gtest_main)
+    ADD_SUBDIRECTORY(${GTEST_SOURCE_DIR} ${CMAKE_BINARY_DIR}/googletest)
+    #include_directories(SYSTEM ${GTEST_INCLUDE_DIR})
+    SET(GTEST_LIBRARIES gtest gtest_main)
 
-    add_custom_target(tests ALL)
-    #add_subdirectory(perftest)
+    #add_custom_target(tests ALL)
+    ADD_SUBDIRECTORY(net/http_cli)
     #add_subdirectory(unittest)
 
-endif(GTESTSRC_FOUND)
+    INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
+    ADD_EXECUTABLE(unittests unittests.cpp)
+    TARGET_LINK_LIBRARIES(unittests PRIVATE ${GTEST_LIBRARIES})
+ENDIF(GTESTSRC_FOUND)

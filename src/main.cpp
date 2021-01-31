@@ -1,8 +1,19 @@
 ﻿//
 // Created by admin on 2021/1/9.
 //
-#include "net/httpcli/session.h"
+#include <iostream>
+#include "net/http_cli/session.h"
+
 int main() {
-    HttpCli::Session session;
+    using namespace HttpCli;
+    Session session;
+    session.Init();
+    session.Get(
+            Url("https://www.baidu.com"),
+            ResponseHandler([](auto&& resp) {
+
+                std::cout << resp.text;
+
+            }));
    return 0;
 }

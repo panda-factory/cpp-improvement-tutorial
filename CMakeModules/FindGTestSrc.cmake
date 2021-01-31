@@ -1,7 +1,7 @@
-
+SET(GOOGLETEST_VERSION "1.10.0")
 set(GTEST_SEARCH_PATH
     "${GTEST_SOURCE_DIR}"
-    "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/googletest/googletest")
+    "${CMAKE_CURRENT_LIST_DIR}/../third_party/googletest-1.10.0/googletest")
 
 find_path(GTEST_SOURCE_DIR
     NAMES CMakeLists.txt src/gtest_main.cc
