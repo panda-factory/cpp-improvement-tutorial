@@ -7,9 +7,9 @@
 
 #include <string>
 
-namespace HttpCli {
+namespace http {
 using Method = std::string;
 
-} //namespace HttpCli
+} //namespace http
 
 #endif //TEST_METHOD_H

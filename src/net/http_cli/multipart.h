@@ -5,10 +5,10 @@
 #ifndef TEST_MULTIPART_H
 #define TEST_MULTIPART_H
 
-namespace HttpCli {
+namespace http {
 class Multipart {
 
 };
-} //namespace HttpCli
+} //namespace http
 
 #endif //TEST_MULTIPART_H

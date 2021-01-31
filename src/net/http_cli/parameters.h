@@ -5,12 +5,12 @@
 #ifndef TEST_PARAMETERS_H
 #define TEST_PARAMETERS_H
 #include <string>
-namespace HttpCli {
+namespace http {
 
 struct Parameters {
     std::string content;
 };
 
-} // namespace HttpCli
+} // namespace http
 
 #endif //TEST_PARAMETERS_H

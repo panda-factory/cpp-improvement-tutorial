@@ -5,8 +5,8 @@
 #ifndef TEST_TIMEOUT_H
 #define TEST_TIMEOUT_H
 #include "core/time/time_point.h"
-namespace HttpCli {
+namespace http {
 using Timeout = core::TimeDelta;
-} //namespace HttpCli
+} //namespace http
 
 #endif //TEST_TIMEOUT_H

@@ -12,7 +12,7 @@
 #include "implement/ev/session_impl_ev.h"
 #endif
 
-namespace HttpCli {
+namespace http {
 Session::Session() {
 #if (USE_HTTP_BEAST)
     impl_ = std::make_shared<SessionImplBeast>();
@@ -28,4 +28,4 @@ bool Session::Init() {
 void Session::Request() {
     impl_->DoRequest();
 }
-} // namespace HttpCli
+} // namespace http

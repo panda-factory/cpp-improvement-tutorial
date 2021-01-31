@@ -12,7 +12,7 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
-namespace HttpCli {
+namespace http {
 class SessionImplEV : public SessionImpl {
 public:
 
@@ -90,5 +90,5 @@ private:
     SSL_CTX *sslContext_ = nullptr;
     SSL *ssl_ = NULL;
 };
-} //namespace HttpCli
+} //namespace http
 #endif //TEST_SESSION_IMPL_EV_H

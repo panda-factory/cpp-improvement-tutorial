@@ -3,5 +3,5 @@
 //
 
 #include "parameters.h"
-namespace HttpCli {
-} // namespace HttpCli
+namespace http {
+} // namespace http

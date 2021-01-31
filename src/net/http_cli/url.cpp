@@ -4,7 +4,7 @@
 
 #include "url.h"
 
-namespace HttpCli {
+namespace http {
 
 Url::Url(const std::string& url) : url(url){
     ParseUrl();
@@ -18,4 +18,4 @@ void Url::ParseUrl() {
 
     return;
 }
-} //namespace HttpCli
+} //namespace http

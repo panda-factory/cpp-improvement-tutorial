@@ -3,7 +3,7 @@
 //
 #include "session_impl.h"
 
-namespace HttpCli {
+namespace http {
 // Used in templated functions
 void SessionImpl::SetOption(const Url &url) {
     SetUrl(url);
@@ -72,4 +72,4 @@ void SessionImpl::SetOption(const body &body) {
 void SessionImpl::SetOption(const ResponseHandler&& onResponse) {
     SetHandler(std::move(onResponse));
 }
-} // namespace HttpCli
+} // namespace http

@@ -9,7 +9,7 @@
 #include <map>
 
 
-namespace HttpCli {
+namespace http {
 struct CaseInsensitiveCompare {
     bool operator()(const std::string& a, const std::string& b) const noexcept {
         return std::lexicographical_compare(
@@ -19,7 +19,7 @@ struct CaseInsensitiveCompare {
 };
 using Header = std::map<std::string, std::string, CaseInsensitiveCompare>;
 
-} //namespace HttpCli
+} //namespace http
 
 
 #endif //TEST_HEADER_H

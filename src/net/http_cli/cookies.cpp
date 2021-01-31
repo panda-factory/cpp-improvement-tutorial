@@ -13,9 +13,9 @@
 #include <functional>
 #include <iostream>
 
-namespace HttpCli {
+namespace http {
 
 void Cookies::ParseCookieString(const std::string& cookie_str) {
 
 }
-} //namespace HttpCli
+} //namespace http

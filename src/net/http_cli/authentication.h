@@ -5,12 +5,12 @@
 #ifndef TEST_AUTHENTICATION_H
 #define TEST_AUTHENTICATION_H
 
-namespace HttpCli {
+namespace http {
 
 class authentication {
 
 };
-} //namespace HttpCli
+} //namespace http
 
 
 #endif //TEST_AUTHENTICATION_H

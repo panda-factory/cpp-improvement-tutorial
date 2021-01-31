@@ -4,11 +4,11 @@
 
 #ifndef TEST_DIGEST_H
 #define TEST_DIGEST_H
-namespace HttpCli {
+namespace http {
 
 class Digest {
 
 };
-} //namespace HttpCli
+} //namespace http
 
 #endif //TEST_DIGEST_H

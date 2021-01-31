@@ -18,7 +18,7 @@
 
 #include "core/scope_exit.h"
 #include "core/logging.h"
-namespace HttpCli {
+namespace http {
 namespace {
 
 void HandleResponse(struct evhttp_request* req, void* ctx) {
@@ -419,4 +419,4 @@ void SessionImplEV::SetBody(const body &body) {
 const Url& SessionImplEV::url() const {
     return url_;
 }
-} //namespace HttpCli
+} //namespace http

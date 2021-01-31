@@ -4,11 +4,11 @@
 
 #ifndef TEST_MAXREDIRECTS_H
 #define TEST_MAXREDIRECTS_H
-namespace HttpCli {
+namespace http {
 
 class MaxRedirects {
 
 };
-} //namespace HttpCli
+} //namespace http
 
 #endif //TEST_MAXREDIRECTS_H

@@ -20,7 +20,7 @@
 #include "net/http_cli/retries.h"
 #include "retries.h"
 
-namespace HttpCli {
+namespace http {
 class SessionImpl {
 public:
     virtual bool DoInit() = 0;
@@ -98,6 +98,6 @@ public:
 
     virtual ~SessionImpl() {}
 };
-} //namespace HttpCli
+} //namespace http
 
 #endif //TEST_SESSION_IMPL_H

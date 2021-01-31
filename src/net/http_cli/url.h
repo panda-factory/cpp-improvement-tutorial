@@ -7,7 +7,7 @@
 #include <string>
 
 #include "core/macros.h"
-namespace HttpCli {
+namespace http {
 struct Url {
 
     //! Wether the url requires TLS
@@ -40,6 +40,6 @@ private:
 
     //CORE_DISALLOW_COPY_AND_ASSIGN(Url);
 };
-} //namespace HttpCli
+} //namespace http
 
 #endif //TEST_URL_H

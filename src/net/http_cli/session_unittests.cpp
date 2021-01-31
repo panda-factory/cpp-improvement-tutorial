@@ -7,7 +7,7 @@
 #include "core/logging.h"
 
 TEST(SessionTest, Session_GET_HTTP_BAIDU) {
-    using namespace HttpCli;
+    using namespace http;
     Session session;
     session.Init();
     Error error;
@@ -20,7 +20,7 @@ TEST(SessionTest, Session_GET_HTTP_BAIDU) {
 }
 
 TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
-    using namespace HttpCli;
+    using namespace http;
     Session session;
     session.Init();
     Error error;
@@ -33,7 +33,7 @@ TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
 }
 
 TEST(SessionTest, Session_GET_0) {
-    using namespace HttpCli;
+    using namespace http;
     Session session;
     session.Init();
     Error error;
@@ -46,7 +46,7 @@ TEST(SessionTest, Session_GET_0) {
 }
 
 TEST(SessionTest, Session_GET_1) {
-    using namespace HttpCli;
+    using namespace http;
     Session session;
     session.Init();
     Error error;
@@ -59,7 +59,7 @@ TEST(SessionTest, Session_GET_1) {
 }
 
 TEST(SessionTest, Session_GET_2) {
-    using namespace HttpCli;
+    using namespace http;
     Session session;
     session.Init();
     Error error;
@@ -72,7 +72,7 @@ TEST(SessionTest, Session_GET_2) {
 }
 
 TEST(SessionTest, Session_GET_TIMEOUT) {
-    using namespace HttpCli;
+    using namespace http;
     Session session;
     session.Init();
     Error error;

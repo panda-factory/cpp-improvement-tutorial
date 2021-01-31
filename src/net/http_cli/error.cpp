@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-namespace HttpCli {
+namespace http {
 Error::Error() : code_{ErrorCode::OK} {
 
 }
@@ -26,4 +26,4 @@ std::ostream& operator<<(std::ostream& os, const Error& err) {
     os << std::string(err);
     return os;
 }
-} // namespace HttpCli
+} // namespace http

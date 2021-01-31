@@ -28,7 +28,7 @@
 #include "net/http_cli/session_impl.h"
 #include "net/http_cli/error.h"
 
-namespace HttpCli {
+namespace http {
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
@@ -107,7 +107,7 @@ private:
     ResponseHandler responseHandler_;
     boost::beast::flat_buffer buffer_; // (Must persist between reads)
 };
-} //namespace HttpCli
+} //namespace http
 
 
 #endif //TEST_SESSIONIMPLBEAST_H

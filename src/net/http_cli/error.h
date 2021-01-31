@@ -6,7 +6,7 @@
 #define TEST_ERROR_H
 #include <string>
 #include <sstream>
-namespace HttpCli {
+namespace http {
 enum class ErrorCode : unsigned int {
     OK = 0,
     TIMEDOUT,
@@ -45,7 +45,7 @@ public:
     operator std::string() const;
 };
 
-} // namespace HttpCli
+} // namespace http
 
 
 #endif //TEST_ERROR_H

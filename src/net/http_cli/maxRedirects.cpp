@@ -3,6 +3,6 @@
 //
 
 #include "maxRedirects.h"
-namespace HttpCli {
+namespace http {
 
-} //namespace HttpCli
+} //namespace http

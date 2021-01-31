@@ -4,7 +4,7 @@
 
 #include "session_impl_beast.h"
 
-namespace HttpCli {
+namespace http {
 
 SessionImplBeast::SessionImplBeast() {
 
@@ -384,4 +384,4 @@ void SessionImplBeast::SetBody(body &&body) {
 void SessionImplBeast::SetBody(const body &body) {
 
 }
-} //namespace HttpCli
+} //namespace http

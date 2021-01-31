@@ -4,7 +4,7 @@
 
 #ifndef TEST_RETRIES_H
 #define TEST_RETRIES_H
-namespace HttpCli {
+namespace http {
 using Retries = size_t;
 }
 #endif //TEST_RETRIES_H

@@ -13,7 +13,7 @@
 #include "net/http_cli/header.h"
 #include "net/http_cli/url.h"
 
-namespace HttpCli {
+namespace http {
 /**
  * \brief Passed to the unary callback xxhr::on_response.
  *        Provides access to request Content and Success, HTTP Status Codes or Errors.
@@ -59,7 +59,7 @@ private:
     std::function<void(Response&&)> handler_ = nullptr;
 };
 
-} // namespace HttpCli
+} // namespace http
 
 
 #endif //TEST_RESPONSE_H

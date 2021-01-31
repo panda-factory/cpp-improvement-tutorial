@@ -3,6 +3,6 @@
 //
 
 #include "authentication.h"
-namespace HttpCli {
+namespace http {
 
 }

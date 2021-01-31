@@ -4,12 +4,12 @@
 
 #ifndef TEST_BODY_H
 #define TEST_BODY_H
-namespace HttpCli {
+namespace http {
 
 class body {
 
 };
-} //namespace HttpCli
+} //namespace http
 
 
 #endif //TEST_BODY_H

@@ -4,7 +4,7 @@
 
 #include "response.h"
 
-namespace HttpCli {
+namespace http {
 ResponseHandler::ResponseHandler(std::function<void(Response&&)> handler) : handler_(handler) {
 
 }
@@ -34,4 +34,4 @@ void ResponseHandler::operator()(Response&& response) {
     }
 }
 
-} // namespace HttpCli
+} // namespace http

@@ -3,6 +3,6 @@
 //
 
 #include "timeout.h"
-namespace HttpCli {
+namespace http {
 
-} //namespace HttpCli
+} //namespace http
