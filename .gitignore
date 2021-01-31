@@ -32,4 +32,8 @@
 *.app
 
 # Temporary files created during CMake build
+.idea
 cmake-build-debug
+bin
+lib
+third_party
