@@ -16,11 +16,14 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
+#include "openssl_hostname_validation.h"
+
 #include "core/scope_exit.h"
 #include "core/logging.h"
+
 namespace http {
 namespace {
-
+bool ignoreCert = false;
 void HandleResponse(struct evhttp_request* req, void* ctx) {
     char buffer[256];
     int nread;
@@ -121,12 +124,12 @@ int SessionImplEV::AddCertForStore(X509_STORE *store, const std::string& name) {
     return r;
 }
 #endif
-bool ignoreCert = true;
+
 int SessionImplEV::VerifyCertCallback(X509_STORE_CTX *x509_ctx, void *arg) {
     char cert_str[256];
     const char *host = (const char *) arg;
     const char *res_str = "X509_verify_cert failed";
-    HostnameValidationResult res = Error;
+    HostnameValidationResult res = HostnameValidationResult::Error;
 
     /* This is the function that OpenSSL would call if we hadn't called
      * SSL_CTX_set_cert_verify_callback().  Therefore, we are "wrapping"
@@ -144,22 +147,22 @@ int SessionImplEV::VerifyCertCallback(X509_STORE_CTX *x509_ctx, void *arg) {
     server_cert = X509_STORE_CTX_get_current_cert(x509_ctx);
 
     if (ok_so_far) {
-        //res = validate_hostname(host, server_cert);
+        res = ValidateHostname(host, server_cert);
 
         switch (res) {
-            case MatchFound:
+            case HostnameValidationResult::MatchFound:
                 res_str = "MatchFound";
                 break;
-            case MatchNotFound:
+            case HostnameValidationResult::MatchNotFound:
                 res_str = "MatchNotFound";
                 break;
-            case NoSANPresent:
+            case HostnameValidationResult::NoSANPresent:
                 res_str = "NoSANPresent";
                 break;
-            case MalformedCertificate:
+            case HostnameValidationResult::MalformedCertificate:
                 res_str = "MalformedCertificate";
                 break;
-            case Error:
+            case HostnameValidationResult::Error:
                 res_str = "Error";
                 break;
             default:
@@ -171,14 +174,14 @@ int SessionImplEV::VerifyCertCallback(X509_STORE_CTX *x509_ctx, void *arg) {
     X509_NAME_oneline(X509_get_subject_name (server_cert),
                       cert_str, sizeof (cert_str));
 
-    if (res == MatchFound) {
-        printf("https server '%s' has this certificate, "
-               "which looks good to me:\n%s\n",
-               host, cert_str);
+    if (res == HostnameValidationResult::MatchFound) {
+        CORE_LOG(INFO) << "https server '" << host
+                       << "' has this certificate, which looks good to me:" << std::endl
+                       << cert_str;
         return 1;
     } else {
-        printf("Got '%s' for hostname '%s' and certificate:\n%s\n",
-               res_str, host, cert_str);
+        CORE_LOG(INFO) << "Got '" << res_str << "' for hostname " << cert_str << "' and certificate:"
+                       << std::endl << cert_str;
         return 0;
     }
 }

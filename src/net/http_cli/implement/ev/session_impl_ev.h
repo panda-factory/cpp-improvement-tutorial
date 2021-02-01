@@ -64,13 +64,6 @@ public:
 
     ~SessionImplEV();
 private:
-    typedef enum {
-        MatchFound,
-        MatchNotFound,
-        NoSANPresent,
-        MalformedCertificate,
-        Error
-    } HostnameValidationResult;
     static int VerifyCertCallback(X509_STORE_CTX *x509_ctx, void *arg);
     int AddCertForStore(X509_STORE *store, const std::string& name);
     void InitEventConnect();

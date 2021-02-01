@@ -4,6 +4,8 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${HTTP_CLI_DIR})
 message("[gzx]: " + ${LIBEVENT_INCLUDE_DIR})
 SET(HTTP_CLI_IMPL_SRC
+    host_check.cpp
+    openssl_hostname_validation.cpp
     session_impl_ev.cpp)
 
 ADD_LIBRARY(http_cli_impl STATIC ${HTTP_CLI_IMPL_SRC})
