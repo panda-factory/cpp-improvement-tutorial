@@ -1,0 +1,10 @@
+add_compile_options("/std:c++17")
+
+INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(../../../../..)
+INCLUDE_DIRECTORIES(${HTTP_CLI_DIR})
+
+SET(HTTP_CLI_IMPL_SRC
+    session_impl_beast.cpp)
+
+ADD_LIBRARY(http_cli_impl STATIC ${HTTP_CLI_IMPL_SRC})

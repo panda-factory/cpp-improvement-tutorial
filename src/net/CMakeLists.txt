@@ -1,2 +1,3 @@
 
-ADD_SUBDIRECTORY(http_cli)
+ADD_SUBDIRECTORY(http/cli)
+ADD_SUBDIRECTORY(web_socket/cli)

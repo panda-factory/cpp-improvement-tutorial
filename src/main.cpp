@@ -5,7 +5,7 @@
 #include "net/http_cli/session.h"
 
 int main() {
-    using namespace http;
+    using namespace http::cli;
     Session session;
     session.Init();
     session.Get(

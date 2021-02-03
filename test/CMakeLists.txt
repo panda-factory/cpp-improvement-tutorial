@@ -1,4 +1,4 @@
-
+SET(CMAKE_CXX_STANDARD 17)
 SET(GTEST_ROOT ${PROJECT_SOURCE_DIR}/third_party/googletest-1.10.0/googletest)
 
 FIND_PACKAGE(GTestSrc REQUIRED)
