@@ -18,6 +18,7 @@ IF(GTESTSRC_FOUND)
 
     #add_custom_target(tests ALL)
     ADD_SUBDIRECTORY(net/http_cli)
+    ADD_SUBDIRECTORY(net/ws_cli)
     #add_subdirectory(unittest)
 
     INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)

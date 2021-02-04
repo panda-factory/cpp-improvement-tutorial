@@ -4,14 +4,17 @@
 
 #ifndef TEST_WEB_SOCKET_CLI_SESSION_H
 #define TEST_WEB_SOCKET_CLI_SESSION_H
+#include <memory>
+#include <string>
 
-namespace ws::cli {
-class SessionImpl;
+#include "session_impl.h"
+
+namespace ws {
 class Session {
 public:
     bool Init();
 
-    int Connect();
+    int Connect(const std::string& server, int port, const std::string& uri);
 
     Session();
 
@@ -19,6 +22,6 @@ public:
 private:
     std::shared_ptr <SessionImpl> impl_;
 };
-} //namespace ws::cli
+} //namespace ws
 
 #endif //TEST_WEB_SOCKET_CLI_SESSION_H

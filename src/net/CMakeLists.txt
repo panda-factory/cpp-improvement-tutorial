@@ -1,2 +1,3 @@
 
 ADD_SUBDIRECTORY(http_cli)
+ADD_SUBDIRECTORY(ws_cli)

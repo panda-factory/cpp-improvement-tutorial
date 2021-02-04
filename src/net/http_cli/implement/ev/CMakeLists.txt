@@ -2,7 +2,7 @@ add_compile_options("/std:c++17")
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${HTTP_CLI_DIR})
-message("[gzx]: " + ${LIBEVENT_INCLUDE_DIR})
+
 SET(HTTP_CLI_IMPL_SRC
     host_check.cpp
     openssl_hostname_validation.cpp
