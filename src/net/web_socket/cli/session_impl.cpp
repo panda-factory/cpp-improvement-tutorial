@@ -3,3 +3,6 @@
 //
 
 #include "session_impl.h"
+namespace ws::cli {
+
+} // namespace ws::cli
