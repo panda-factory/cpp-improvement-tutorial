@@ -20,10 +20,13 @@ Session::Session() {
 }
 
 int Session::Connect(const std::string& server, int port, const std::string& uri) {
-    impl_->DoConnect(server, port, uri);
-    return 0;
+    return impl_->DoConnect(server, port, uri);
 }
 bool Session::Init() {
-    return 0;
+    return impl_->DoInit();
+}
+
+int Session::SendMsg(char *msg) {
+    return impl_->DoSendMsg(msg);
 }
 } // namespace ws

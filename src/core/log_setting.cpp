@@ -13,7 +13,7 @@
 
 #include "logging.h"
 
-namespace core {
+namespace wtf {
 namespace state {
 
 // Defined in log_settings_state.cc.

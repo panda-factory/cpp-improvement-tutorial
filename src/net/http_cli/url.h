@@ -38,7 +38,7 @@ struct Url {
 private:
     void ParseUrl();
 
-    //CORE_DISALLOW_COPY_AND_ASSIGN(Url);
+    //WTF_DISALLOW_COPY_AND_ASSIGN(Url);
 };
 } //namespace http
 

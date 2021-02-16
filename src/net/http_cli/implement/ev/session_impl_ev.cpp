@@ -28,7 +28,7 @@ void HandleResponse(struct evhttp_request* req, void* ctx) {
     char buffer[256];
     int nread;
     SessionImplEV* that = (SessionImplEV*)(ctx);
-    CORE_CHECK(that);
+    WTF_CHECK(that);
 
     if (!req || !evhttp_request_get_response_code(req)) {
         /* If req is NULL, it means an error occurred, but
@@ -38,12 +38,12 @@ void HandleResponse(struct evhttp_request* req, void* ctx) {
         unsigned long oslerr;
         int printed_err = 0;
         int errcode = EVUTIL_SOCKET_ERROR();
-        CORE_LOG(ERROR) << "some request failed - no idea which one though!";
+        WTF_LOG(ERROR) << "some request failed - no idea which one though!";
         /* Print out the OpenSSL error queue that libevent
          * squirreled away for us, if any. */
         while ((oslerr = bufferevent_get_openssl_error(bev))) {
             ERR_error_string_n(oslerr, buffer, sizeof(buffer));
-            CORE_LOG(ERROR) << buffer;
+            WTF_LOG(ERROR) << buffer;
             printed_err = 1;
         }
         /* If the OpenSSL error queue was empty, maybe it was a
@@ -61,7 +61,7 @@ void HandleResponse(struct evhttp_request* req, void* ctx) {
         return;
     }
 
-    CORE_LOG(INFO) << "Response line: "
+    WTF_LOG(INFO) << "Response line: "
                    << evhttp_request_get_response_code(req) << " "
                    << evhttp_request_get_response_code_line(req);
 
@@ -83,7 +83,7 @@ void HandleResponse(struct evhttp_request* req, void* ctx) {
 void OnError(enum evhttp_request_error, void *ctx) {
 
     SessionImplEV* that = (SessionImplEV*)(ctx);
-    CORE_CHECK(!that);
+    WTF_CHECK(!that);
     that->OnResponse(Response(0,
                               Error{ErrorCode::OK},
                               "oss.str()",
@@ -105,7 +105,7 @@ int SessionImplEV::AddCertForStore(X509_STORE *store, const std::string& name) {
 
     sys_store = CertOpenSystemStore(0, name.c_str());
     if (!sys_store) {
-        CORE_LOG(ERROR) << "failed to open system certificate store";
+        WTF_LOG(ERROR) << "failed to open system certificate store";
         return -1;
     }
     while ((ctx = CertEnumCertificatesInStore(sys_store, ctx))) {
@@ -175,12 +175,12 @@ int SessionImplEV::VerifyCertCallback(X509_STORE_CTX *x509_ctx, void *arg) {
                       cert_str, sizeof (cert_str));
 
     if (res == HostnameValidationResult::MatchFound) {
-        CORE_LOG(INFO) << "https server '" << host
+        WTF_LOG(INFO) << "https server '" << host
                        << "' has this certificate, which looks good to me:" << std::endl
                        << cert_str;
         return 1;
     } else {
-        CORE_LOG(INFO) << "Got '" << res_str << "' for hostname " << cert_str << "' and certificate:"
+        WTF_LOG(INFO) << "Got '" << res_str << "' for hostname " << cert_str << "' and certificate:"
                        << std::endl << cert_str;
         return 0;
     }
@@ -254,7 +254,7 @@ void SessionImplEV::InitEventConnect() {
     evConn_ = evhttp_connection_base_bufferevent_new(evBase_, NULL, evBuffer_,
                                                      url_.host.c_str(), url_.port);
     if (evConn_ == NULL) {
-        CORE_LOG(ERROR) << "evhttp_connection_base_bufferevent_new() failed";
+        WTF_LOG(ERROR) << "evhttp_connection_base_bufferevent_new() failed";
     }
 
     if (retries_ > 0) {
@@ -277,26 +277,26 @@ bool SessionImplEV::DoInit() {
 
         err = WSAStartup(wVersionRequested, &wsaData);
         if (err != 0) {
-            CORE_LOG(ERROR) << "WSAStartup failed with error: " << err;
+            WTF_LOG(ERROR) << "WSAStartup failed with error: " << err;
         }
     }
 #endif // _WIN32
 
     evBase_ = event_base_new();
     if (evBase_ == nullptr) {
-        CORE_LOG(ERROR) << "event_base_new()";
+        WTF_LOG(ERROR) << "event_base_new()";
     }
 
     evReq_ = evhttp_request_new(HandleResponse, this);
     if (evReq_ == nullptr) {
-        CORE_LOG(ERROR) << "evhttp_request_new fail";
+        WTF_LOG(ERROR) << "evhttp_request_new fail";
     }
     evhttp_request_set_error_cb(evReq_, OnError);
     return true;
 }
 
 void SessionImplEV::DoRequest() {
-    CORE_CHECK(!url_.url.empty()) << "url cannot be empty!";
+    WTF_CHECK(!url_.url.empty()) << "url cannot be empty!";
     InitEventConnect();
 
     evhttp_add_header(evReq_->output_headers, "Host", url_.host.c_str());
@@ -304,7 +304,7 @@ void SessionImplEV::DoRequest() {
 
     int result = evhttp_make_request(evConn_, evReq_, EVHTTP_REQ_GET, url_.path.c_str());
     if (result != 0) {
-        CORE_LOG(ERROR) << "evhttp_make_request() failed\n";
+        WTF_LOG(ERROR) << "evhttp_make_request() failed\n";
         //goto error;
     }
 
@@ -312,7 +312,7 @@ void SessionImplEV::DoRequest() {
 }
 
 void SessionImplEV::HandleOpensslError(const std::string& func) {
-    CORE_LOG(ERROR) << func << " failed:";
+    WTF_LOG(ERROR) << func << " failed:";
 
     /* This is the OpenSSL function that prints the contents of the
      * error stack to the specified file handle. */

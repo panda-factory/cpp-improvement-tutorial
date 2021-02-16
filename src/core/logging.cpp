@@ -15,7 +15,7 @@
 
 #include "log_setting.h"
 
-namespace core {
+namespace wtf {
 namespace {
 
 const char* const kLogSeverityNames[LOG_NUM_SEVERITIES] = {"INFO", "WARNING",
@@ -109,4 +109,4 @@ void KillProcess() {
     abort();
 }
 
-}  // namespace core
+}  // namespace wtf

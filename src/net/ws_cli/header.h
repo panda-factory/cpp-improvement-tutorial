@@ -1,14 +1,14 @@
 //
-// Created by admin on 2021/1/10.
+// Created by admin on 2021/2/6.
 //
 
-#ifndef TEST_HTTP_CLI_HEADER_H
-#define TEST_HTTP_CLI_HEADER_H
+#ifndef TEST_WS_CLI_HEADER_H
+#define TEST_WS_CLI_HEADER_H
 
 #include <cctype>
 #include <map>
 
-namespace http {
+namespace ws {
 struct CaseInsensitiveCompare {
     bool operator()(const std::string& a, const std::string& b) const noexcept {
         return std::lexicographical_compare(
@@ -18,7 +18,6 @@ struct CaseInsensitiveCompare {
 };
 using Header = std::map<std::string, std::string, CaseInsensitiveCompare>;
 
-} //namespace http
+} //namespace ws
 
-
-#endif //TEST_HTTP_CLI_HEADER_H
+#endif //TEST_WS_CLI_HEADER_H

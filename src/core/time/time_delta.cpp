@@ -4,5 +4,5 @@
 
 #include "time_delta.h"
 
-namespace core {
-} // namespace core
+namespace wtf {
+} // namespace wtf

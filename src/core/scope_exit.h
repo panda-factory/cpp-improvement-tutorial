@@ -4,7 +4,7 @@
 
 #ifndef TEST_SCOPE_EXIT_H
 #define TEST_SCOPE_EXIT_H
-
+#include <functional>
 class ScopeExit {
 public:
     ScopeExit() = default;

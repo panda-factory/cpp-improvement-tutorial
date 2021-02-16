@@ -5,7 +5,7 @@
 #ifndef TEST_LOG_SETTING_H
 #define TEST_LOG_SETTING_H
 #include "log_level.h"
-namespace core {
+namespace wtf {
 
 // Settings which control the behavior of FML logging.
 struct LogSettings {
@@ -32,7 +32,7 @@ private:
     LogSettings old_settings_;
 };
 
-} // namespace core
+} // namespace wtf
 
 
 #endif //TEST_LOG_SETTING_H

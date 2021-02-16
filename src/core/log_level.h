@@ -4,16 +4,17 @@
 
 #ifndef TEST_LOG_LEVEL_H
 #define TEST_LOG_LEVEL_H
-namespace core {
+namespace wtf {
 
 using LogSeverity = int;
 
 // Default log levels. Negative values can be used for verbose log levels.
 constexpr LogSeverity LOG_INFO = 0;
-constexpr LogSeverity LOG_WARNING = 1;
-constexpr LogSeverity LOG_ERROR = 2;
-constexpr LogSeverity LOG_FATAL = 3;
-constexpr LogSeverity LOG_NUM_SEVERITIES = 4;
+constexpr LogSeverity LOG_DEBUG = 1;
+constexpr LogSeverity LOG_WARNING = 2;
+constexpr LogSeverity LOG_ERROR = 3;
+constexpr LogSeverity LOG_FATAL = 4;
+constexpr LogSeverity LOG_NUM_SEVERITIES = 5;
 
 // One of the Windows headers defines ERROR to 0. This makes the token
 // concatenation in FML_LOG(ERROR) to resolve to LOG_0. We define this back to
@@ -29,5 +30,5 @@ const LogSeverity LOG_DFATAL = LOG_ERROR;
 const LogSeverity LOG_DFATAL = LOG_FATAL;
 #endif
 
-} // namespace core
+} // namespace wtf
 #endif //TEST_LOG_LEVEL_H

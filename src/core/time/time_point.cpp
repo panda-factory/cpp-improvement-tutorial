@@ -4,7 +4,7 @@
 
 #include "time_point.h"
 
-namespace core {
+namespace wtf {
 
 TimePoint TimePoint::Now() {
     // The base time is arbitrary; use the clock epoch for convenience.
@@ -13,4 +13,4 @@ TimePoint TimePoint::Now() {
             std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed_time)
                     .count());
 }
-} // namespace core
+} // namespace wtf

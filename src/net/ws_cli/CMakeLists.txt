@@ -1,9 +1,13 @@
 SET(WS_CLI_DIR .)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(${LIBEVENT_INCLUDE_DIR})
 
 SET(WS_CLI_SRC
-    ${WS_CLI_DIR}/session.cpp)
+    ${WS_CLI_DIR}/connect_handler.cpp
+    ${WS_CLI_DIR}/message_handler.cpp
+    ${WS_CLI_DIR}/session.cpp
+    ${WS_CLI_DIR}/session_impl.cpp)
 
 ADD_SUBDIRECTORY(implement)
 

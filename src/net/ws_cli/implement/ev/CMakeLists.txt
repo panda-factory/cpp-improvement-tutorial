@@ -1,9 +1,13 @@
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${WS_CLI_DIR})
+INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
 
 SET(WS_CLI_IMPL_SRC
-    session_impl_ev.cpp)
+    session_impl_ev.cpp
+    util.cpp
+    utf8_utils.cpp
+    ws_header.cpp)
 
 ADD_LIBRARY(ws_cli_impl STATIC ${WS_CLI_IMPL_SRC})
 

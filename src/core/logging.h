@@ -9,7 +9,7 @@
 #include "log_level.h"
 #include "macros.h"
 
-namespace core {
+namespace wtf {
 
 class LogMessageVoidify {
 public:
@@ -32,7 +32,7 @@ private:
     const char* file_;
     const int line_;
 
-    CORE_DISALLOW_COPY_AND_ASSIGN(LogMessage);
+    WTF_DISALLOW_COPY_AND_ASSIGN(LogMessage);
 };
 
 int GetVlogVerbosity();
@@ -41,54 +41,54 @@ bool ShouldCreateLogMessage(LogSeverity severity);
 
 [[noreturn]] void KillProcess();
 
-} // namespace core
+} // namespace wtf
 
-#define CORE_LOG_STREAM(severity) \
-  ::core::LogMessage(::core::LOG_##severity, __FILE__, __LINE__, nullptr).stream()
+#define WTF_LOG_STREAM(severity) \
+  ::wtf::LogMessage(::wtf::LOG_##severity, __FILE__, __LINE__, nullptr).stream()
 
-#define CORE_LAZY_STREAM(stream, condition) \
-  !(condition) ? (void)0 : ::core::LogMessageVoidify() & (stream)
+#define WTF_LAZY_STREAM(stream, condition) \
+  !(condition) ? (void)0 : ::wtf::LogMessageVoidify() & (stream)
 
-#define CORE_EAT_STREAM_PARAMETERS(ignored) \
+#define WTF_EAT_STREAM_PARAMETERS(ignored) \
   true || (ignored)                        \
       ? (void)0                            \
-      : ::core::LogMessageVoidify() &       \
-            ::core::LogMessage(::Core::LOG_FATAL, 0, 0, nullptr).stream()
+      : ::wtf::LogMessageVoidify() &       \
+            ::wtf::LogMessage(::wtf::LOG_FATAL, 0, 0, nullptr).stream()
 
-#define CORE_LOG_IS_ON(severity) \
-  (::core::ShouldCreateLogMessage(::core::LOG_##severity))
+#define WTF_LOG_IS_ON(severity) \
+  (::wtf::ShouldCreateLogMessage(::wtf::LOG_##severity))
 
-#define CORE_LOG(severity) \
-  CORE_LAZY_STREAM(CORE_LOG_STREAM(severity), CORE_LOG_IS_ON(severity))
+#define WTF_LOG(severity) \
+  WTF_LAZY_STREAM(WTF_LOG_STREAM(severity), WTF_LOG_IS_ON(severity))
 
-#define CORE_CHECK(condition)                                              \
-  CORE_LAZY_STREAM(                                                        \
-      ::core::LogMessage(::core::LOG_FATAL, __FILE__, __LINE__, #condition) \
+#define WTF_CHECK(condition)                                              \
+  WTF_LAZY_STREAM(                                                        \
+      ::wtf::LogMessage(::wtf::LOG_FATAL, __FILE__, __LINE__, #condition) \
           .stream(),                                                      \
       !(condition))
 
-#define CORE_VLOG_IS_ON(verbose_level) \
-  ((verbose_level) <= ::core::GetVlogVerbosity())
+#define WTF_VLOG_IS_ON(verbose_level) \
+  ((verbose_level) <= ::wtf::GetVlogVerbosity())
 
 // The VLOG macros log with negative verbosities.
-#define CORE_VLOG_STREAM(verbose_level) \
-  ::Core::LogMessage(-verbose_level, __FILE__, __LINE__, nullptr).stream()
+#define WTF_VLOG_STREAM(verbose_level) \
+  ::wtf::LogMessage(-verbose_level, __FILE__, __LINE__, nullptr).stream()
 
 #define CORE_VLOG(verbose_level) \
-  CORE_LAZY_STREAM(CORE_VLOG_STREAM(verbose_level), CORE_VLOG_IS_ON(verbose_level))
+  WTF_LAZY_STREAM(WTF_VLOG_STREAM(verbose_level), WTF_VLOG_IS_ON(verbose_level))
 
 #ifndef NDEBUG
-#define CORE_DLOG(severity) CORE_LOG(severity)
-#define CORE_DCHECK(condition) CORE_CHECK(condition)
+#define WTF_DLOG(severity) WTF_LOG(severity)
+#define WTF_DCHECK(condition) WTF_CHECK(condition)
 #else
-#define CORE_DLOG(severity) CORE_EAT_STREAM_PARAMETERS(true)
-#define CORE_DCHECK(condition) CORE_EAT_STREAM_PARAMETERS(condition)
+#define WTF_DLOG(severity) WTF_EAT_STREAM_PARAMETERS(true)
+#define WTF_DCHECK(condition) WTF_EAT_STREAM_PARAMETERS(condition)
 #endif
 
-#define CORE_UNREACHABLE()                          \
+#define WTF_UNREACHABLE()                          \
   {                                                \
-    CORE_LOG(ERROR) << "Reached unreachable code."; \
-    ::Core::KillProcess();                          \
+    WTF_LOG(ERROR) << "Reached unreachable code."; \
+    ::wtf::KillProcess();                          \
   }
 
 #endif //TEST_LOGGING_H
