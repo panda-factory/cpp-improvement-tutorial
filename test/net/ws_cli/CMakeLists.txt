@@ -7,6 +7,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 SET(WS_CLI_TEST_SRC
     ws_cli_unittests.cpp
     ${WS_CLI_TEST_DIR}/session_unittests.cpp
+    ${WS_CLI_TEST_DIR}/implement/ev/base64_unittests.cpp
     )
 
 ADD_EXECUTABLE(ws_cli_unittests ${WS_CLI_TEST_SRC})

@@ -2,6 +2,11 @@
 // Created by admin on 2021/2/4.
 //
 
+#ifdef WIN32
+#define _CRT_RAND_S
+#include <stdlib.h>
+#endif
+
 #include "net/ws_cli/implement/ev/session_impl_ev.h"
 
 #include <openssl/sha.h>
@@ -11,11 +16,7 @@
 #include "core/fmt_string.h"
 #include "core/scope_exit.h"
 #include "ws_header.h"
-
-#ifdef WIN32
-#define _CRT_RAND_S
-#include <stdlib.h>
-#endif
+#include "base64.h"
 
 #ifdef _WIN32
 #include <time.h>
@@ -38,15 +39,13 @@ bool CompareStrIgnoreCase(const std::string& a, const std::string& b)
 
 void MaskPayload(uint32_t mask, char *msg, uint64_t len)
 {
-    size_t i;
     uint8_t *m = (uint8_t *)&mask;
     uint8_t *p = (uint8_t *)msg;
 
     if (!msg || !len)
         return;
 
-    for (i = 0; i < len; i++)
-    {
+    for (size_t i = 0; i < len; i++) {
         p[i] ^= m[i % 4];
     }
 }
@@ -105,7 +104,7 @@ void SessionImplEV::OnConnectionTimeout(evutil_socket_t fd, short what, void *ar
 
 }
 // | static |
-void SessionImplEV::OnRead(bufferevent *bev, void *ObscureData) {
+void SessionImplEV::OnRead(struct bufferevent *bev, void *ObscureData) {
     WTF_LOG(INFO) << "OnRead";
 
     SessionImplEV* thiz = (SessionImplEV*)(ObscureData);
@@ -144,11 +143,11 @@ void SessionImplEV::OnRead(bufferevent *bev, void *ObscureData) {
 }
 // | static |
 void SessionImplEV::OnWrite(bufferevent* bev, void* ObscureData) {
-    WTF_LOG(INFO) << "write cb";
+    WTF_LOG(INFO) << "OnWrite";
 }
 // | static |
 void SessionImplEV::OnEvent(bufferevent* bev, short events, void* ObscureData) {
-    WTF_LOG(INFO) << "event cb";
+    WTF_LOG(INFO) << "OnEvent";
 
     SessionImplEV* thiz = (SessionImplEV*)(ObscureData);
     WTF_CHECK(thiz);
@@ -182,6 +181,27 @@ void SessionImplEV::OnEvent(bufferevent* bev, short events, void* ObscureData) {
     }
 }
 
+int SessionImplEV::Quit(int let_running_events_complete) {
+    return QuitDelay(let_running_events_complete, NULL);
+}
+
+int SessionImplEV::QuitDelay(int let_running_events_complete, const struct timeval *delay) {
+    int ret;
+
+    WTF_LOG(INFO) << "Websocket base quit";
+
+    if (let_running_events_complete)
+    {
+        ret = event_base_loopexit(evBase_, delay);
+    }
+    else
+    {
+        ret = event_base_loopbreak(evBase_);
+    }
+
+    return ret;
+}
+
 void SessionImplEV::OnEofEvent(struct bufferevent *bev, short events) {
     WTF_LOG(INFO) << "EOF cb";
 
@@ -209,18 +229,17 @@ void SessionImplEV::OnEofEvent(struct bufferevent *bev, short events) {
         status = WSCloseStatus::ABNORMAL_1006;
     }
 
-    if (onClose_)
-    {
+    if (onClose_) {
         WTF_LOG(DEBUG) << "Call close callback";
 
         onClose_(status, serverReason_,
                      serverReasonLen_,
                      nullptr);
-    }
-    else
-    {
+    } else {
         WTF_LOG(DEBUG) << "No close callback";
     }
+
+    Quit(1);
 }
 
 void SessionImplEV::OnConnectEvent(bufferevent *bev, short events) {
@@ -364,42 +383,21 @@ int SessionImplEV::DoConnect(const std::string& server, int port, const std::str
     return 0;
 }
 
-int SessionImplEV::GetRandomMask(char *buf, size_t len) {
-#ifdef _WIN32
-    size_t i;
-    unsigned int tmp;
-
-    // http://msdn.microsoft.com/en-us/library/sxtz2fa8(VS.80).aspx
-    for (i = 0; i < len; i++) {
-        tmp = rand();
-
-        buf[i] = (char)tmp;
-    }
-#else
-    int i;
-	i = read(ws->ws_base->random_fd, buf, len);
-#endif
-
-    return i;
-}
-
 int SessionImplEV::GenerateHandshakeKey() {
-    char rand_key[16];
-    int key_len;
+    unsigned char randKey[16];
 
     WTF_LOG(INFO) << "Generate handshake key";
 
     // A |Sec-WebSocket-Key| header field with a base64-encoded (see
     // Section 4 of [RFC4648]) value that, when decoded, is 16 bytes in
     // length.
-    if (GetRandomMask(rand_key, sizeof(rand_key)) < 0) {
+    if (GetRandomMask(randKey, sizeof(randKey)) < 0) {
         WTF_LOG(ERROR) << "Failed to get random byte sequence "
                              "for Websocket upgrade handshake key";
         return -1;
     }
 
-    handshakeKeyBase64_ = Encode64((const void *)rand_key,
-                                            sizeof(rand_key), &key_len);
+    handshakeKeyBase64_ = EncodeBase64(randKey, sizeof(randKey));
 
     if (handshakeKeyBase64_.empty()) {
         WTF_LOG(ERROR) << "Failed to base64 encode websocket key";
@@ -632,7 +630,7 @@ int SessionImplEV::OnSendMsgBegin(int binary) {
     wsHeader_ = {0};
     // FIN, RSVx bits are 0.
     wsHeader_.opcode = binaryMode_ ?
-                        WSOpCode::BINARY_0X2 : WSOpCode::TEXT_0X1;
+                       WSOpcode::BINARY_0X2 : WSOpcode::TEXT_0X1;
 
     sendState_ = WSSendState::MESSAGE_BEGIN;
 
@@ -663,7 +661,7 @@ int SessionImplEV::OnMsgFrameDataBegin(uint64_t datalen) {
     wsHeader_.maskBit = 0x1;
     wsHeader_.payloadLen = datalen;
 
-    if (GetRandomMask((char *)&wsHeader_.mask, sizeof(uint32_t))
+    if (GetRandomMask((unsigned char *)&wsHeader_.mask, sizeof(uint32_t))
         != sizeof(uint32_t)) {
         return -1;
     }
@@ -671,13 +669,13 @@ int SessionImplEV::OnMsgFrameDataBegin(uint64_t datalen) {
     if (sendState_ == WSSendState::MESSAGE_BEGIN)
     {
         // Opcode will be set to either TEXT or BINARY here.
-        WTF_CHECK((wsHeader_.opcode == WSOpCode::TEXT_0X1)
-               || (wsHeader_.opcode == WSOpCode::BINARY_0X2));
+        WTF_CHECK((wsHeader_.opcode == WSOpcode::TEXT_0X1)
+               || (wsHeader_.opcode == WSOpcode::BINARY_0X2));
 
         sendState_ = WSSendState::IN_MESSAGE;
     } else {
         // We've already sent frames.
-        wsHeader_.opcode = WSOpCode::CONTINUATION_0X0;
+        wsHeader_.opcode = WSOpcode::CONTINUATION_0X0;
     }
 
     PackHeader(wsHeader_, header_buf, sizeof(header_buf), &header_len);
@@ -772,7 +770,7 @@ int SessionImplEV::SendMsgEx(char *msg, uint64_t len, int binary) {
 
     // Use _ws_send_frame_raw if we're not fragmenting the message.
     if ((len <= maxFrameSize_) || !maxFrameSize_) {
-        return SendFrameRaw(binary ? WSOpCode::BINARY_0X2 : WSOpCode::TEXT_0X1,
+        return SendFrameRaw(binary ? WSOpcode::BINARY_0X2 : WSOpcode::TEXT_0X1,
                                   msg, len);
     }
 
@@ -807,14 +805,10 @@ int SessionImplEV::SendMsgEx(char *msg, uint64_t len, int binary) {
     return 0;
 }
 
-int SessionImplEV::DoSendMsg(char *msg) {
+int SessionImplEV::DoSendMsg(const std::string& msg) {
     int ret = 0;
-    size_t len = 0;
 
-    if (msg)
-        len = strlen(msg);
-
-    ret = SendMsgEx(msg, (uint64_t)len, 0);
+    ret = SendMsgEx(const_cast<char*>(msg.c_str()), msg.size(), 0);
 
     return ret;
 }
@@ -880,19 +874,19 @@ int SessionImplEV::ValidateHeader() {
         return -1;
     }
 
-    if (WS_OPCODE_IS_RESERVED(wsHeader_.opcode)) {
+    if (IsReservedOpcode(wsHeader_.opcode)) {
         WTF_LOG(ERROR) << wtf::FmtString("Protocol violation, reserved opcode used %d (%s)",
                                          wsHeader_.opcode, Opcode2Str(wsHeader_.opcode));
         return -1;
     }
 
-    if (WS_OPCODE_IS_CONTROL(wsHeader_.opcode) && !wsHeader_.fin) {
+    if (IsControlOpcode(wsHeader_.opcode) && !wsHeader_.fin) {
         WTF_LOG(ERROR) << wtf::FmtString("Protocol violation, fragmented %s not allowed",
                                          Opcode2Str(wsHeader_.opcode));
         return -1;
     }
 
-    if (wsHeader_.opcode == WSOpCode::CONTINUATION_0X0 &&
+    if (wsHeader_.opcode == WSOpcode::CONTINUATION_0X0 &&
         inMsgFlag_) {
         WTF_LOG(ERROR) << "Got continuation frame when not in message";
         return -1;
@@ -901,7 +895,7 @@ int SessionImplEV::ValidateHeader() {
     // If we're in a message, we must either get a continuation frame
     // or an interjected control frame such as a ping.
     if (inMsgFlag_ &&
-        (wsHeader_.opcode != WSOpCode::CONTINUATION_0X0 && !WS_OPCODE_IS_CONTROL(wsHeader_.opcode))) {
+        (wsHeader_.opcode != WSOpcode::CONTINUATION_0X0 && !IsControlOpcode(wsHeader_.opcode))) {
         WTF_LOG(ERROR) << wtf::FmtString("Didn't get continuation frame when still in message. opcode %d (%s)",
                                          wsHeader_.opcode, Opcode2Str(wsHeader_.opcode));
         return -1;
@@ -911,7 +905,7 @@ int SessionImplEV::ValidateHeader() {
 }
 
 
-int SessionImplEV::SendData(char *msg, uint64_t len, int no_copy) {
+int SessionImplEV::SendData(const char *msg, uint64_t len, int no_copy) {
     // TODO: We supply a len of uint64_t, evbuffer_add uses size_t...
 
     WTF_LOG(INFO) << wtf::FmtString("Send the data (%llu bytes)", len);
@@ -944,7 +938,7 @@ int SessionImplEV::SendData(char *msg, uint64_t len, int no_copy) {
     return 0;
 }
 
-int SessionImplEV::SendFrameRaw(WSOpCode opcode, char *data, uint64_t dataLen) {
+int SessionImplEV::SendFrameRaw(WSOpcode opcode, char *data, uint64_t dataLen) {
     uint8_t header_buf[WS_HDR_MAX_SIZE];
     size_t header_len = 0;
 
@@ -957,8 +951,7 @@ int SessionImplEV::SendFrameRaw(WSOpCode opcode, char *data, uint64_t dataLen) {
 
     // All control frames MUST have a payload length of 125 bytes or less
     // and MUST NOT be fragmented.
-    if (WS_OPCODE_IS_CONTROL(opcode) && (dataLen > 125))
-    {
+    if (IsControlOpcode(opcode) && (dataLen > 125)) {
         WTF_LOG(ERROR) << "Control frame payload cannot be larger than 125 bytes";
         return -1;
     }
@@ -970,8 +963,7 @@ int SessionImplEV::SendFrameRaw(WSOpCode opcode, char *data, uint64_t dataLen) {
         wsHeader_.fin = 0x1;
         wsHeader_.opcode = opcode;
 
-        if (dataLen > WS_MAX_PAYLOAD_LEN)
-        {
+        if (dataLen > WS_MAX_PAYLOAD_LEN) {
             WTF_LOG(ERROR) << wtf::FmtString("Payload length (0x%x) larger than max allowed "
                                              "websocket payload (0x%x)",
                                              dataLen, WS_MAX_PAYLOAD_LEN);
@@ -981,7 +973,7 @@ int SessionImplEV::SendFrameRaw(WSOpCode opcode, char *data, uint64_t dataLen) {
         wsHeader_.maskBit = 0x1;
         wsHeader_.payloadLen = dataLen;
 
-        if (GetRandomMask(reinterpret_cast<char *>(&wsHeader_.mask), sizeof(wsHeader_.mask))
+        if (GetRandomMask(reinterpret_cast<unsigned char *>(&wsHeader_.mask), sizeof(wsHeader_.mask))
             != sizeof(uint32_t)) {
             return -1;
         }
@@ -1028,13 +1020,17 @@ int SessionImplEV::SendClose(WSCloseStatus statusCode, const char *reason, size_
     *((uint16_t *)close_payload) = htons((uint16_t)statusCode);
     memcpy(&close_payload[2], reason, reason_len);
 
-    if (SendFrameRaw(WSOpCode::CLOSE_0X8,
+    if (SendFrameRaw(WSOpcode::CLOSE_0X8,
                      close_payload, reason_len + 2)) {
         WTF_LOG(ERROR) << "Failed to send close frame";
         return -1;
     }
 
     return 0;
+}
+
+int SessionImplEV::DoClose() {
+    return CloseWithStatusReason(WSCloseStatus::NORMAL_1000, NULL, 0);
 }
 
 int SessionImplEV::CloseWithStatusReason(WSCloseStatus status, const char *reason, size_t reason_len) {
@@ -1117,7 +1113,7 @@ int SessionImplEV::CloseWithStatus(WSCloseStatus status) {
     return CloseWithStatusReason(status, NULL, 0);
 }
 
-void SessionImplEV::OnMsgBegin() {
+void SessionImplEV::OnRecvMsgBegin() {
 
     WTF_LOG(INFO) << "Default message begin callback "
                      "(setup message buffer)";
@@ -1160,11 +1156,11 @@ void SessionImplEV::OnMsgFrameBegin(void *arg) {
 }
 
 int SessionImplEV::HandleFrameBegin() {
-    WTF_LOG(INFO) << wtf::FmtString("Frame begin, opcode = %d", wsHeader_.opcode);
+    WTF_LOG(INFO) << wtf::FmtString("Frame begin, opcode = %s", Opcode2Str(wsHeader_.opcode));
 
     recvFrameLen_ = 0;
 
-    if (WS_OPCODE_IS_CONTROL(wsHeader_.opcode)) {
+    if (IsControlOpcode(wsHeader_.opcode)) {
         WTF_LOG(DEBUG) << "Control frame";
         memset(ctrlPayload_, 0, sizeof(ctrlPayload_));
         ctrlLen_ = 0;
@@ -1174,14 +1170,13 @@ int SessionImplEV::HandleFrameBegin() {
     WTF_LOG(DEBUG) << "Normal frame";
 
     // Normal frame.
-    if (!inMsgFlag_)
-    {
-        inMsgFlag_ = 1;
+    if (!inMsgFlag_) {
+        inMsgFlag_ = true;
         utf8State_ = WS_UTF8_ACCEPT;
-        msgIsBinary_ = (wsHeader_.opcode == WSOpCode::BINARY_0X2);
+        msgIsBinary_ = (wsHeader_.opcode == WSOpcode::BINARY_0X2);
 
         WTF_LOG(DEBUG) << "Call message begin callback";
-        OnMsgBegin();
+        OnRecvMsgBegin();
     }
 
     WTF_LOG(DEBUG) << "Call frame begin callback";
@@ -1298,19 +1293,19 @@ int SessionImplEV::HandleControlFrame()
 {
     WTF_LOG(INFO) << "Control frame";
 
-    WTF_CHECK(WS_OPCODE_IS_CONTROL(wsHeader_.opcode));
+    WTF_CHECK(IsControlOpcode(wsHeader_.opcode));
 
     switch (wsHeader_.opcode)
     {
-        case WSOpCode::CLOSE_0X8: return HandleCloseFrame();
-        case WSOpCode::PONG_0XA: return HandlePongFrame();
-        case WSOpCode::PING_0X9: return HandlePingFrame();
+        case WSOpcode::CLOSE_0X8: return HandleCloseFrame();
+        case WSOpcode::PONG_0XA: return HandlePongFrame();
+        case WSOpcode::PING_0X9: return HandlePingFrame();
         default:
-        case WSOpCode::CONTROL_RSV_0XB:
-        case WSOpCode::CONTROL_RSV_0XC:
-        case WSOpCode::CONTROL_RSV_0XD:
-        case WSOpCode::CONTROL_RSV_0XE:
-        case WSOpCode::CONTROL_RSV_0XF:
+        case WSOpcode::CONTROL_RSV_0XB:
+        case WSOpcode::CONTROL_RSV_0XC:
+        case WSOpcode::CONTROL_RSV_0XD:
+        case WSOpcode::CONTROL_RSV_0XE:
+        case WSOpcode::CONTROL_RSV_0XF:
             WTF_LOG(ERROR) << wtf::FmtString("Got unknown control frame 0x%x", wsHeader_.opcode);
             return -1;
     }
@@ -1343,7 +1338,7 @@ void SessionImplEV::OnMsgFrameEnd(void *arg) {
     frameData_ = nullptr;
 }
 
-void SessionImplEV::OnMsgEnd(void *arg) {
+void SessionImplEV::OnRecvMsgEnd(void *arg) {
     size_t len;
     unsigned char *payload;
 
@@ -1359,7 +1354,7 @@ void SessionImplEV::OnMsgEnd(void *arg) {
 
     WTF_LOG(DEBUG) << wtf::FmtString("Message received of length %lu:\n%s", len, payload);
 
-    if (onMessage_.IsValid()) {
+    if (onMessage_.IsValid() && state_ != WSState::CLOSING) {
         WTF_LOG(DEBUG) << "Calling message callback";
         onMessage_((char *)payload, len,
                    msgIsBinary_, nullptr);
@@ -1375,16 +1370,16 @@ int SessionImplEV::HandleFrameEnd()
 {
     WTF_LOG(DEBUG) << wtf::FmtString("Frame end, opcode = %d", wsHeader_.opcode);
 
-    if (WS_OPCODE_IS_CONTROL(wsHeader_.opcode))
-    {
+    if (IsControlOpcode(wsHeader_.opcode)) {
         hasHeader_ = false;
         return HandleControlFrame();
     }
 
     OnMsgFrameEnd(nullptr);
 
+    //! fin=1 indicates is a final fragment in a message.
     if (wsHeader_.fin) {
-        OnMsgEnd(nullptr);
+        OnRecvMsgEnd(nullptr);
         inMsgFlag_ = false;
     }
 
@@ -1408,7 +1403,7 @@ int SessionImplEV::HandleFrameData(char *buf, size_t len)
     int ret = 0;
     WTF_LOG(INFO) << "Handle frame data";
 
-    if (WS_OPCODE_IS_CONTROL(wsHeader_.opcode)) {
+    if (IsControlOpcode(wsHeader_.opcode)) {
         size_t total_len = (ctrlLen_ + len);
 
         if (total_len > WS_CONTROL_MAX_PAYLOAD_LEN) {
@@ -1465,8 +1460,7 @@ void SessionImplEV::ReadWebsocket(struct evbuffer *in)
                 state = WSParseState::ERROR;
             }
 
-            switch (state)
-            {
+            switch (state) {
                 case WSParseState::SUCCESS:
                     hasHeader_ = true;
 
@@ -1476,7 +1470,7 @@ void SessionImplEV::ReadWebsocket(struct evbuffer *in)
                                                     headerLen, wsHeader_.fin, wsHeader_.rsv1, wsHeader_.rsv2,
                                                     wsHeader_.rsv3, wsHeader_.maskBit, wsHeader_.opcode,
                                                     Opcode2Str(wsHeader_.opcode), wsHeader_.mask, wsHeader_.payloadLen);
-
+                    // Remove header len bytes data from the beginning of input evbuffer.
                     if (evbuffer_drain(in, headerLen)) {
                         // TODO: Error! close
                         WTF_LOG(ERROR) << "Failed to drain header buffer";
@@ -1535,8 +1529,7 @@ void SessionImplEV::ReadWebsocket(struct evbuffer *in)
                 }
 
                 // Validate UTF8 text. Control frames are handled seperately.
-                if (!msgIsBinary &&
-                    !WS_OPCODE_IS_CONTROL(wsHeader_.opcode)) {
+                if (!msgIsBinary && !IsControlOpcode(wsHeader_.opcode)) {
                     WTF_LOG(INFO) << wtf::FmtString("About to validate UTF8, state = %d"
                                             " len = %d", utf8State_, bytes_read);
 
@@ -1545,9 +1538,7 @@ void SessionImplEV::ReadWebsocket(struct evbuffer *in)
 
                     // Either the UTF8 is invalid, or a codepoint is not
                     // complete in the finish frame.
-                    if ((utf8State_ == WS_UTF8_REJECT)
-                        || ((utf8State_ != WS_UTF8_ACCEPT) && (wsHeader_.fin)))
-                    {
+                    if ((utf8State_ == WS_UTF8_REJECT) || ((utf8State_ != WS_UTF8_ACCEPT) && (wsHeader_.fin))) {
                         WTF_LOG(ERROR) << "Invalid UTF8!";
 
                         CloseWithStatus(WSCloseStatus::INCONSISTENT_DATA_1007);
@@ -1627,17 +1618,12 @@ int SessionImplEV::SendHandshake(struct evbuffer *out) {
         return -1;
     }
 
-    evbuffer_add_printf(out,
-                        "GET /%s HTTP/1.1\r\n"
-                        "Host: %s:%d\r\n"
-                        "Connection: Upgrade\r\n"
-                        "Upgrade: websocket\r\n"
-                        "Sec-Websocket-Version: 13\r\n"
-                        "Sec-WebSocket-Key: %s\r\n",
-                        (!uri_.empty() ? uri_.c_str() : ""),
-                        host_.c_str(),
-                        port_,
-                        handshakeKeyBase64_.c_str());
+    evbuffer_add_printf(out, "GET /%s HTTP/1.1\r\n", !uri_.empty() ? uri_.c_str() : "");
+    evbuffer_add_printf(out, "Host: %s:%d\r\n",host_.c_str(), port_);
+    evbuffer_add_printf(out, "Connection: Upgrade\r\n");
+    evbuffer_add_printf(out, "Upgrade: websocket\r\n");
+    evbuffer_add_printf(out, "Sec-Websocket-Version: 13\r\n");
+    evbuffer_add_printf(out, "Sec-WebSocket-Key: %s\r\n", handshakeKeyBase64_.c_str());
 
     // missing this key maybe lead to 403 response.
     if (!origin_.empty()) {
@@ -1666,30 +1652,21 @@ int SessionImplEV::SendHandshake(struct evbuffer *out) {
     return 0;
 }
 
-int SessionImplEV::CalculateKeyHash(const char *handshake_key_base64,
-                           char *key_hash, size_t len)
+std::string SessionImplEV::CalculateKeyHash(const char *handshake_key_base64)
 {
-    char key_hash_sha1[20]; // SHA1, 160 bits = 20 bytes.
-    char *key_hash_sha1_base64;
-    int base64_len;
-    char accept_key[] = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    strcpy(key_hash, handshake_key_base64);
-    strcat(key_hash, accept_key);
+    unsigned char keyHashSha1[20]; // SHA1, 160 bits = 20 bytes.
+    constexpr char accept_key[] = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-    SHA1((unsigned char *)key_hash,
-         strlen(key_hash), (unsigned char *)key_hash_sha1);
+    std::string keyHash(std::string(handshake_key_base64).append(accept_key));
 
-    key_hash_sha1_base64 = Encode64((const void *)key_hash_sha1,
-                                        sizeof(key_hash_sha1), &base64_len);
+    SHA1(reinterpret_cast<const unsigned char *>(keyHash.c_str()),
+         keyHash.size(), keyHashSha1);
 
-    if (!key_hash_sha1_base64)
-        return -1;
+    std::string KeyHashSha1Base64 = EncodeBase64(keyHashSha1, sizeof(keyHashSha1));
 
-    strcpy(key_hash, key_hash_sha1_base64);
-    free(key_hash_sha1_base64);
-
-    return 0;
+    return std::move(KeyHashSha1Base64);
 }
+
 int SessionImplEV::ValidateHttpHeader(uint8_t flag,
                                       const std::string& name, const std::string& val,
                                       const std::string& expectedName, const std::string& expected_val,
@@ -1791,15 +1768,13 @@ int SessionImplEV::ValidateHttpHeaders(const std::string& name, const std::strin
     //    trailing whitespace, the client MUST _Fail the WebSocket
     //    Connection_.
     {
-        char key_hash[256];
-
-        if (CalculateKeyHash(handshakeKeyBase64_.c_str(),
-                                   key_hash, sizeof(key_hash))) {
+        std::string acceptKeyHash = CalculateKeyHash(handshakeKeyBase64_.c_str());
+        if (acceptKeyHash.empty()) {
             return -1;
         }
 
         if (ValidateHttpHeader(WS_HAS_VALID_WS_ACCEPT_HEADER,
-                               name, val, "Sec-WebSocket-Accept", key_hash, 1)) {
+                               name, val, "Sec-WebSocket-Accept", acceptKeyHash.c_str(), 1)) {
             return -1;
         }
     }
@@ -1846,7 +1821,7 @@ int SessionImplEV::ValidateHttpHeaders(const std::string& name, const std::strin
         {
             // TODO: Parse extension list here. Right now no extensions are supported, so fail by default.
             WTF_LOG(ERROR) << wtf::FmtString("The server wants to use an extension "
-                                 "we didn't request: %s", val);
+                                 "we didn't request: %s", val.c_str());
             // TODO: Set close reason here.
             return -1;
         }
@@ -1876,7 +1851,7 @@ int SessionImplEV::ValidateHttpHeaders(const std::string& name, const std::strin
         //if (_ws_check_server_protocol_list(ws, val))
         {
             WTF_LOG(ERROR) << wtf::FmtString("Server wanted to use a subprotocol we "
-                                 "didn't request: %s", val);
+                                 "didn't request: %s", val.c_str());
 
             httpHeaderFlags_ &= ~WS_HAS_VALID_WS_PROTOCOL_HEADER;
             return -1;

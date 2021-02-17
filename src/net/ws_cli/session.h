@@ -14,9 +14,11 @@ class Session {
 public:
     bool Init();
 
+    int Close();
+
     int Connect(const std::string& server, int port, const std::string& uri);
 
-    int SendMsg(char *msg);
+    int SendMsg(const std::string& msg);
 
     template<typename T>
     void SetOption(T&& t);

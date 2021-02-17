@@ -18,7 +18,7 @@
 namespace wtf {
 namespace {
 
-const char* const kLogSeverityNames[LOG_NUM_SEVERITIES] = {"INFO", "WARNING",
+const char* const kLogSeverityNames[LOG_NUM_SEVERITIES] = {"INFO", "DEBUG", "WARNING",
                                                            "ERROR", "FATAL"};
 
 const char* GetNameForLogSeverity(LogSeverity severity) {

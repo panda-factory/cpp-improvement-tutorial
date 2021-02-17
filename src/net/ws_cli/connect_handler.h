@@ -19,6 +19,6 @@ public:
 private:
     std::function<void()> handler_ = nullptr;
 };
-}
+} // namespace ws
 
 #endif //TEST_CONNECTHANDLER_H

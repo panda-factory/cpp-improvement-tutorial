@@ -19,6 +19,10 @@ Session::Session() {
 #endif
 }
 
+int Session::Close() {
+    return impl_->DoClose();
+}
+
 int Session::Connect(const std::string& server, int port, const std::string& uri) {
     return impl_->DoConnect(server, port, uri);
 }
@@ -26,7 +30,7 @@ bool Session::Init() {
     return impl_->DoInit();
 }
 
-int Session::SendMsg(char *msg) {
+int Session::SendMsg(const std::string& msg) {
     return impl_->DoSendMsg(msg);
 }
 } // namespace ws

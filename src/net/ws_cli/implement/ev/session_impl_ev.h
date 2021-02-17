@@ -21,9 +21,10 @@
 namespace ws {
 class SessionImplEV : public SessionImpl {
 public:
+    int DoClose() override;
     int DoConnect(const std::string& server, int port, const std::string& uri) override;
     int DoInit() override;
-    int DoSendMsg(char *msg) override;
+    int DoSendMsg(const std::string& msg) override;
 
     void SetHandler(const ConnectHandler& onConnect) override;
     void SetHandler(const MessageHandler& onMessage) override;
@@ -33,13 +34,12 @@ private:
     static void BuiltinNoCopyCleanupWrapper(const void *data, size_t dataLen, void *extra);
     static void OnCloseTimeout(evutil_socket_t fd, short what, void *arg);
     static void OnConnectionTimeout(evutil_socket_t fd, short what, void *arg);
-    static void OnRead(bufferevent* bev, void* ObscureData);
-    static void OnWrite(bufferevent* bev, void* ObscureData);
-    static void OnEvent(bufferevent* bev, short events, void* ObscureData);
+    static void OnRead(struct bufferevent* bev, void* ObscureData);
+    static void OnWrite(struct bufferevent* bev, void* ObscureData);
+    static void OnEvent(struct bufferevent* bev, short events, void* ObscureData);
     int CheckServerProtocolList(const char *val);
     int CloseWithStatus(WSCloseStatus status);
     int CloseWithStatusReason(WSCloseStatus status, const char *reason, size_t reason_len);
-    int GetRandomMask(char *buf, size_t len);
     int GenerateHandshakeKey();
     const std::string GetUri(char *buf, size_t bufsize);
     int HandleCloseFrame();
@@ -53,8 +53,8 @@ private:
     void OnEofEvent(struct bufferevent *bev, short events);
     int OnSendMsgBegin(int binary);
     int OnSendMsgEnd();
-    void OnMsgBegin();
-    void OnMsgEnd(void *arg);
+    void OnRecvMsgBegin();
+    void OnRecvMsgEnd(void *arg);
     void OnMsgFrame(char *payload, uint64_t len, void *arg);
     void OnMsgFrameData(char *payload, uint64_t len, void *arg);
     void OnMsgFrameBegin(void *arg);
@@ -67,6 +67,8 @@ private:
                         int& httpMajorVersion,
                         int& httpMinorVersion,
                         int& statusCode);
+    int Quit(int let_running_events_complete);
+    int QuitDelay(int let_running_events_complete, const struct timeval *delay);
     WSParseState ReadHttpHeaders(struct evbuffer *in);
     WSParseState ReadHttpStatus(
             struct evbuffer *inBuf,
@@ -78,14 +80,13 @@ private:
     void ReadWebsocket(struct evbuffer *in);
     int SendMsgEx(char *msg, uint64_t len, int binary);
     int SendClose(WSCloseStatus statusCode, const char *reason, size_t reason_len);
-    int SendData(char *msg, uint64_t len, int no_copy);
-    int SendFrameRaw(WSOpCode opcode, char *data, uint64_t dataLen);
+    int SendData(const char *msg, uint64_t len, int no_copy);
+    int SendFrameRaw(WSOpcode opcode, char *data, uint64_t dataLen);
     int SendHandshake(struct evbuffer *out);
     int SetupConnectionTimeout();
     int SetupTimeoutEvent(struct event **ev, struct timeval *tv);
     void ShutDown();
-    int CalculateKeyHash(const char *handshake_key_base64,
-                                        char *key_hash, size_t len);
+    std::string CalculateKeyHash(const char *handshake_key_base64);
     int ValidateHeader();
     int ValidateHttpHeader(uint8_t flag,
                            const std::string& name, const std::string& val,
@@ -114,7 +115,6 @@ private:
     uint64_t recvFrameLen_;
     uint64_t maxFrameSize_;    ///< The max frame size to allow before chunking.
     char ctrlPayload_[WS_CONTROL_MAX_PAYLOAD_LEN];
-                ///< Control frame payload.
     size_t ctrlLen_;            ///< Length of the control payload.
     WSState state_;
     Utf8State utf8State_; ///< Current state of utf8 validator.

@@ -13,9 +13,10 @@ namespace ws {
 
 class SessionImpl {
 public:
+    virtual int DoClose() = 0;
     virtual int DoInit() = 0;
     virtual int DoConnect(const std::string& server, int port, const std::string& uri) = 0;
-    virtual int DoSendMsg(char *msg) = 0;
+    virtual int DoSendMsg(const std::string& msg) = 0;
 
     virtual void SetHandler(const ConnectHandler& onConnect) = 0;
     virtual void SetHandler(const MessageHandler& onMessage) = 0;

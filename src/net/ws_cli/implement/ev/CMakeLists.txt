@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES(${WS_CLI_DIR})
 INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
 
 SET(WS_CLI_IMPL_SRC
+    base64.cpp
     session_impl_ev.cpp
     util.cpp
     utf8_utils.cpp

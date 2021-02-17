@@ -18,7 +18,7 @@ constexpr int  WS_HDR_MASK_SIZE = 4;
 constexpr int  WS_HDR_MIN_SIZE = WS_HDR_BASE_SIZE;
 constexpr int  WS_HDR_MAX_SIZE = (WS_HDR_BASE_SIZE + WS_HDR_PAYLOAD_LEN_SIZE + WS_HDR_MASK_SIZE);
 
-enum WSOpCode {
+enum WSOpcode {
     CONTINUATION_0X0 = 0x0,
     TEXT_0X1 = 0x1,
     BINARY_0X2 = 0x2,
@@ -69,39 +69,17 @@ enum WSOpCode {
 ///
 #pragma pack(push,1)
 struct WSHeader {
-    uint8_t fin : 1;            ///< Final frame bit.
+    uint8_t fin : 1;            //! Indicates that this is the final fragment in a message.
     uint8_t rsv1 : 1;            ///< Reserved bit 1 for extensions.
     uint8_t rsv2 : 1;            ///< Reserved bit 2 for extensions.
     uint8_t rsv3 : 1;            ///< Reserved bit 3 for extensions.
     uint8_t opcode : 4;        ///< Operation code.
     uint8_t maskBit : 1;        ///< If this frame is masked this bit is set.
     uint8_t payloadLen : 7;    ///< Length of the payload.
+    uint64_t exPayloadLen;	    ///< Length of the payload.
     uint32_t mask;            ///< Masking key for the payload.
 };
 #pragma pack(pop)
-
-inline bool WS_OPCODE_IS_CONTROL(const uint8_t code) {
-    const WSOpCode opcode = static_cast<WSOpCode>(code);
-    return (opcode >= WSOpCode::CLOSE_0X8) &&
-            (opcode <= WSOpCode::CONTROL_RSV_0XF);
-}
-
-inline bool WS_OPCODE_IS_RESERVED_CONTROL(const uint8_t code) {
-    const WSOpCode opcode = static_cast<WSOpCode>(code);
-    return (opcode >= WSOpCode::CONTROL_RSV_0XB) &&
-            (opcode <= WSOpCode::CONTROL_RSV_0XF);
-}
-
-inline bool WS_OPCODE_IS_RESERVED_NON_CONTROL(const uint8_t code) {
-    const WSOpCode opcode = static_cast<WSOpCode>(code);
-    return (opcode >= WSOpCode::NON_CONTROL_RSV_0X3) &&
-           (opcode <= WSOpCode::NON_CONTROL_RSV_0X7);
-}
-
-inline bool WS_OPCODE_IS_RESERVED(const uint8_t code) {
-    return WS_OPCODE_IS_RESERVED_CONTROL(code) ||
-            WS_OPCODE_IS_RESERVED_NON_CONTROL(code);
-}
 
 #define WS_IS_CLOSE_STATUS_NOT_USED(code) \
 	(((int)code < 1000) || ((int)code > 4999))
