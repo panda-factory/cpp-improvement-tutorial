@@ -6,7 +6,7 @@
 #define TEST_UTIL_H
 
 #include <cstdint>
-#include "net/ws_cli/ws_types.h"
+#include "ws_types.h"
 namespace ws {
 const char* Opcode2Str(const uint8_t opcode);
 

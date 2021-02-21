@@ -12,7 +12,7 @@ Url::Url(const std::string& url) : url(url){
 
 
 bool Url::IsHttps() const {
-    return protocol == "https";
+    return schema == "https";
 }
 void Url::ParseUrl() {
 

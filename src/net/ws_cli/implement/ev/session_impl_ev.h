@@ -10,7 +10,7 @@
 #include "net/ws_cli/session_impl.h"
 #include "net/ws_cli/header.h"
 #include "net/ws_cli/implement/ev/ws_state.h"
-#include "net/ws_cli/ws_types.h"
+#include "ws_types.h"
 #include "utf8_utils.h"
 
 #include <event2/dns.h>

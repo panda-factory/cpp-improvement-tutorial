@@ -11,7 +11,7 @@ namespace http {
 
 class Session {
 public:
-    bool Init();
+    int Init();
 
     template<typename... Ts>
     void Get(Ts&&... ts);

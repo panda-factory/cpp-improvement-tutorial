@@ -9,5 +9,13 @@ SET(MAIN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
 
 ADD_EXECUTABLE(main ${MAIN_SRC})
 
-TARGET_LINK_DIRECTORIES(main PRIVATE ${PROJECT_SOURCE_DIR}/third_party/libevent/lib)
-TARGET_LINK_LIBRARIES(main PRIVATE core http_cli ${OPENSSL_LIBRARIES} event_openssl.lib event_extra.lib event_core.lib ws2_32.lib winmm.lib wldap32.lib)
+TARGET_LINK_LIBRARIES(main PRIVATE core http_cli ${OPENSSL_LIBRARIES} ws2_32.lib winmm.lib wldap32.lib)
+
+if (USE_LIBEVENT)
+    TARGET_LINK_DIRECTORIES(main PRIVATE ${PROJECT_SOURCE_DIR}/third_party/libevent/lib)
+    TARGET_LINK_LIBRARIES(main PRIVATE
+        event_openssl.lib event_extra.lib event_core.lib)
+elseif (USE_LIBUV)
+    TARGET_LINK_DIRECTORIES(main PRIVATE ${LIBUV_LIBRARY_DIR})
+    TARGET_LINK_LIBRARIES(main PRIVATE ${LIBUV_LIBRARIES})
+endif ()

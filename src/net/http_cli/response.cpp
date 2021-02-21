@@ -28,6 +28,10 @@ const Error& Response::error() {
     return error_;
 }
 
+void Response::SetBody(const std::string&& body) {
+    body_ = std::move(body);
+}
+
 void ResponseHandler::operator()(Response&& response) {
     if (handler_ != nullptr) {
         handler_(std::forward<Response>(response));

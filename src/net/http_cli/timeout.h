@@ -6,7 +6,7 @@
 #define TEST_TIMEOUT_H
 #include "core/time/time_point.h"
 namespace http {
-using Timeout = core::TimeDelta;
+using Timeout = wtf::TimeDelta;
 } //namespace http
 
 #endif //TEST_TIMEOUT_H

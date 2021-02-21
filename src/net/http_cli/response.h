@@ -20,6 +20,9 @@ namespace http {
  */
 class Response {
 public:
+
+    void SetBody(const std::string&& body);
+
     const std::string& body();
 
     const Error& error();

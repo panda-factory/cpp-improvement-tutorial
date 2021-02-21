@@ -19,7 +19,7 @@ struct Url {
 
     std::string url;
     //!
-    std::string protocol;
+    std::string schema;
 
     //!
     std::string host;
@@ -31,7 +31,7 @@ struct Url {
     std::string path;
 
     //!
-    std::string parameters;
+    std::string query;
 
     //!
     std::string fragment;

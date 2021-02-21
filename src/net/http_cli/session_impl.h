@@ -23,7 +23,7 @@
 namespace http {
 class SessionImpl {
 public:
-    virtual bool DoInit() = 0;
+    virtual int DoInit() = 0;
 
     virtual void SetUrl(const Url &url) = 0;
 
@@ -59,6 +59,8 @@ public:
 
     virtual void SetRetries(const Retries &retries) = 0;
 
+    virtual void DoRequest() = 0;
+
     // Used in templated functions
     void SetOption(const Url &url);
 
@@ -93,8 +95,6 @@ public:
     void SetOption(const ResponseHandler&& onResponse);
 
     void SetOption(const Retries&& retries);
-
-    virtual void DoRequest() = 0;
 
     virtual ~SessionImpl() {}
 };

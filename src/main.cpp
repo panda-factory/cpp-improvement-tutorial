@@ -9,11 +9,6 @@ int main() {
     Session session;
     session.Init();
     session.Get(
-            Url("https://www.baidu.com"),
-            ResponseHandler([](auto&& resp) {
-
-                std::cout << resp.text;
-
-            }));
-   return 0;
+            Url("http://www.baidu.com"));
+    return 0;
 }

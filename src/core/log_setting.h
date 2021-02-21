@@ -11,6 +11,7 @@ namespace wtf {
 struct LogSettings {
 
     LogSeverity min_log_level = LOG_INFO;
+    size_t max_log_size = 4096;
 };
 
 // Gets the active log settings for the current process.

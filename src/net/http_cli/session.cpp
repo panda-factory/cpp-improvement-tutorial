@@ -6,22 +6,26 @@
 
 #include "core/macros.h"
 
-#if (USE_HTTP_BEAST)
+#if (__USE_BEAST__)
 #include "implement/beast/session_impl_beast.h"
-#else
+#elif (__USE_LIBEVENT__)
 #include "implement/ev/session_impl_ev.h"
+#elif (__USE_LIBUV__)
+#include "implement/uv/session_impl_uv.h"
 #endif
 
 namespace http {
 Session::Session() {
 #if (USE_HTTP_BEAST)
     impl_ = std::make_shared<SessionImplBeast>();
-#else
+#elif (__USE_LIBEVENT__)
     impl_ = std::make_shared<SessionImplEV>();
+#elif (__USE_LIBUV__)
+    impl_ = std::make_shared<SessionImplUV>();
 #endif
 }
 
-bool Session::Init() {
+int Session::Init() {
     return impl_->DoInit();
 }
 

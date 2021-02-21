@@ -6,7 +6,7 @@
 #define TEST_WSHEADER_H
 
 #include <memory>
-#include "net/ws_cli/ws_types.h"
+#include "ws_types.h"
 
 namespace ws {
 

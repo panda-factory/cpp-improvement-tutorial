@@ -18,7 +18,7 @@ TEST(SessionTest, Session_GET_HTTP_BAIDU) {
             }));
     ASSERT_EQ(error, ErrorCode::OK);
 }
-
+#if 0
 TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
     using namespace http;
     Session session;
@@ -70,3 +70,4 @@ TEST(SessionTest, Session_GET_2) {
             }));
     ASSERT_EQ(error, ErrorCode::OK);
 }
+#endif
