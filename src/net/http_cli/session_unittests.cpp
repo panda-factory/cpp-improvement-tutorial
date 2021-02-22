@@ -14,10 +14,11 @@ TEST(SessionTest, Session_GET_HTTP_BAIDU) {
     session.Get(
             Url("http://www.baidu.com"),
             ResponseHandler([&](auto&& resp) {
-                error = resp.error();
+                error = resp.error;
             }));
     ASSERT_EQ(error, ErrorCode::OK);
 }
+
 #if 0
 TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
     using namespace http;
@@ -27,7 +28,7 @@ TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
     session.Get(
             Url("https://www.baidu.com"),
             ResponseHandler([&](auto&& resp) {
-                error = resp.error();
+                error = resp.error;
             }));
     ASSERT_EQ(error, ErrorCode::OK);
 }
@@ -36,38 +37,25 @@ TEST(SessionTest, Session_GET_0) {
     using namespace http;
     Session session;
     session.Init();
-    Error error;
+    std::string status;
     session.Get(
             Url("http://httpbin.org/anything"),
             ResponseHandler([&](auto&& resp) {
-                error = resp.error();
+                status = resp.status;
             }));
-    ASSERT_EQ(error, ErrorCode::OK);
+    ASSERT_EQ(status, "OK");
 }
 
-TEST(SessionTest, Session_GET_1) {
+TEST(SessionTest, Session_REDIRECTORY) {
     using namespace http;
     Session session;
     session.Init();
-    Error error;
+    std::string status;
     session.Get(
             Url("http://www.so.com/status.html"),
             ResponseHandler([&](auto&& resp) {
-                error = resp.error();
+                status = resp.status;
             }));
-    ASSERT_EQ(error, ErrorCode::OK);
-}
-
-TEST(SessionTest, Session_GET_2) {
-    using namespace http;
-    Session session;
-    session.Init();
-    Error error;
-    session.Get(
-            Url("http://www.360.cn/robots.txt"),
-            ResponseHandler([&](auto&& resp) {
-                error = resp.error();
-            }));
-    ASSERT_EQ(error, ErrorCode::OK);
+    ASSERT_EQ(status, "OK");
 }
 #endif

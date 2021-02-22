@@ -70,8 +70,6 @@ void SessionImplUV::OnResolved(uv_getaddrinfo_t *resolver, int status, struct ad
     WTF_LOG(INFO) << addr;
 
     thiz->Connect((const struct sockaddr*) res->ai_addr);
-
-    uv_freeaddrinfo(res);
 }
 // | static | http-parser |
 int SessionImplUV::OnHttpParserBody(http_parser *parser, const char *p, size_t len) {
@@ -119,7 +117,8 @@ int SessionImplUV::OnHttpParserStatus(http_parser* parser, const char* status, s
     SessionImplUV* thiz = static_cast<SessionImplUV*>(parser->data);
     WTF_CHECK(thiz);
 
-    thiz->response_.SetBody()
+    thiz->response_.status = std::string(status, len);
+    thiz->response_.statusCode = parser->status_code;
     return 0;
 }
 
@@ -160,11 +159,10 @@ int SessionImplUV::OnRecvBody(const char *p, size_t len) {
 }
 
 int SessionImplUV::OnRecvComplete() {
-    OnResponse(Response(0, // 0 for errors which are on the layer belows http, like XmlHttpRequest.
-                        Error{ErrorCode::UNKNOWN_ERROR},
-                        bodyStream_.str(),
-                        std::move(header_),
-                        std::move(url_)));
+    response_.body = std::move(bodyStream_.str());
+    response_.url = std::move(url_);
+    response_.header = std::move(header_);
+    OnResponse(std::move(response_));
     return 0;
 }
 
@@ -173,13 +171,12 @@ void SessionImplUV::OnResponse(Response&& response) {
 }
 
 int SessionImplUV::Resolve() {
-    static struct addrinfo hints;
-    hints.ai_family = PF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = IPPROTO_TCP;
-    hints.ai_flags = 0;
+    hints_.ai_family = PF_INET;
+    hints_.ai_socktype = SOCK_STREAM;
+    hints_.ai_protocol = IPPROTO_TCP;
+    hints_.ai_flags = 0;
     resolver_.data = this;
-    int r = uv_getaddrinfo(loop_, &resolver_, SessionImplUV::OnResolved, url_.host.c_str(), std::to_string(url_.port).c_str(), &hints);
+    int r = uv_getaddrinfo(loop_, &resolver_, SessionImplUV::OnResolved, url_.host.c_str(), std::to_string(url_.port).c_str(), &hints_);
 
     if (r) {
         WTF_LOG(ERROR) << wtf::FmtString("getaddrinfo call error %s\n", uv_err_name(r));
@@ -235,6 +232,7 @@ void SessionImplUV::SetParameters(Parameters &&parameters) {
 }
 
 void SessionImplUV::SetHandler(const ResponseHandler&& onResponse) {
+    responseHandler_ = std::move(onResponse);
 }
 
 void SessionImplUV::SetHeader(const Header &headers) {
@@ -252,7 +250,7 @@ void SessionImplUV::SetDigest(const Digest &auth) {
 }
 
 void SessionImplUV::SetMethod(const Method &method) {
-
+    request_.method = method;
 }
 
 void SessionImplUV::SetMultipart(Multipart &&multipart) {

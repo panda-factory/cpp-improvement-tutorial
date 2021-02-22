@@ -18,6 +18,7 @@
 #include "net/http_cli/response.h"
 #include "net/http_cli/method.h"
 #include "net/http_cli/retries.h"
+#include "net/http_cli/request.h"
 #include "retries.h"
 
 namespace http {

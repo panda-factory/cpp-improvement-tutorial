@@ -18,38 +18,34 @@ namespace http {
  * \brief Passed to the unary callback xxhr::on_response.
  *        Provides access to request Content and Success, HTTP Status Codes or Errors.
  */
-class Response {
+struct Response {
 public:
 
-    void SetBody(const std::string&& body);
-
-    const std::string& body();
-
-    const Error& error();
 
     Response() = default;
 
     Response(const std::int32_t &status_code, Error error, const std::string& body, const Header& header,
              const Url& url, Cookies &&cookies = Cookies{});
 
-private:
     //! HTTP Status Code as Specified in [HTTP RFC](https://tools.ietf.org/html/rfc7231#section-6.1).
-    std::int32_t status_code;
+    std::int32_t statusCode;
+
+    std::string status;
 
     //! Error condition proper to a lower layer than HTTP.
-    Error error_;
+    Error error;
 
     //! Response body
-    std::string body_;
+    std::string body;
 
     //! Headers entries sent in the response
-    Header header_;
+    Header header;
 
     //! Url that served this
-    Url url_;
+    Url url;
 
     //! Cookies that the server would like you to keep reminding in future queries.
-    Cookies cookies_;
+    Cookies cookies;
 
 };
 class ResponseHandler {

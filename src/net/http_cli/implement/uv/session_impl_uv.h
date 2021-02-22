@@ -72,10 +72,12 @@ private:
     Url url_;
     Header header_;
     std::ostringstream bodyStream_;
+    Request request_;
     Response response_;
     ResponseHandler responseHandler_;
 
     // | Field |
+    struct addrinfo hints_;
     uv_loop_t* loop_;
     uv_getaddrinfo_t resolver_;
     uv_connect_t connReq_;
