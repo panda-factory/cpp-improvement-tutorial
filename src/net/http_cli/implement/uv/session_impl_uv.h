@@ -8,6 +8,7 @@
 #include "net/http_cli/session_impl.h"
 #include "http_parser.h"
 #include "uv.h"
+
 namespace http {
 class SessionImplUV : public SessionImpl {
 public:
@@ -69,10 +70,8 @@ private:
     int Write(uv_stream_t * stream);
 
     std::string field_;
-    Url url_;
-    Header header_;
-    std::ostringstream bodyStream_;
     Request request_;
+    std::ostringstream bodyStream_;
     Response response_;
     ResponseHandler responseHandler_;
 

@@ -34,6 +34,7 @@ private:
 template<typename... Ts>
 void Session::Get(Ts&&... ts) {
     SetOption(std::forward<Ts>(ts)...);
+    SetOption(Method("GET"));
     impl_->DoRequest();
 }
 

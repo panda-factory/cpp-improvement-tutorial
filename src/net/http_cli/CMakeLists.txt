@@ -18,6 +18,7 @@ SET(HTTP_CLI_SRC
     ${HTTP_CLI_DIR}/maxRedirects.cpp
     ${HTTP_CLI_DIR}/multipart.cpp
     ${HTTP_CLI_DIR}/parameters.cpp
+    ${HTTP_CLI_DIR}/request.cpp
     ${HTTP_CLI_DIR}/response.cpp
     ${HTTP_CLI_DIR}/session.cpp
     ${HTTP_CLI_DIR}/session_impl.cpp

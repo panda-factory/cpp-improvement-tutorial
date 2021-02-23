@@ -5,6 +5,7 @@
 #ifndef TEST_FMT_STRING_H
 #define TEST_FMT_STRING_H
 #include <string>
+#include <vector>
 namespace wtf {
 template<typename ...Args>
 std::string FmtString(const std::string& format, Args... args) {
@@ -15,9 +16,9 @@ std::string FmtString(const std::string& format, Args... args) {
     newlen++; // 算上终止符'\0'
 
     if (newlen > oldlen) { // 默认缓冲区不够大，从堆上分配
-        std::vector<char> newbuffer(newlen);
-        snprintf(newbuffer.data(), newlen, format.c_str(), args...);
-        return std::string(newbuffer.data());
+        std::vector<char> newBuffer(newlen);
+        snprintf(newBuffer.data(), newlen, format.c_str(), args...);
+        return std::string(newBuffer.data());
     }
 
     return buffer;
