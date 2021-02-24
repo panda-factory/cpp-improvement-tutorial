@@ -11,6 +11,10 @@ void Request::PreparePayload() {
                           method.c_str(),
                           url.path.empty() ? "/" : url.path.c_str(),
                           httpMajor, httpMinor);
+    raw += wtf::FmtString("Host: %s\r\n",
+                          url.host.c_str());
+
+
 
     raw += "\r\n";
 }

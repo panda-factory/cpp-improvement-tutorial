@@ -54,6 +54,7 @@ private:
     static void OnClose(uv_handle_t* handle);
     static void OnConnect(uv_connect_t* req, int status);
     static int OnHttpParserBody(http_parser *parser, const char *p, size_t len);
+    static int OnHttpParserHeaderComplete(http_parser* parser);
     static int OnHttpParserMessageComplete(http_parser* parser);
     static int OnHttpParserHeaderField(http_parser* parser, const char* header, size_t len);
     static int OnHttpParserHeaderValue(http_parser* parser, const char* value, size_t len);

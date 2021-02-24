@@ -10,6 +10,7 @@
 namespace http {
 // | static | uv |
 void SessionImplUV::OnAlloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
+    WTF_LOG(INFO) << "OnAlloc";
     void *ptr;
     ptr = malloc(suggested_size);
     buf->base = (char *)ptr;
@@ -37,6 +38,7 @@ void SessionImplUV::OnClose(uv_handle_t* handle) {
 }
 // | static | uv |
 void SessionImplUV::OnRead(uv_stream_t *tcp, ssize_t nread, const uv_buf_t *buf) {
+    WTF_LOG(INFO) << "OnRead";
     WTF_CHECK(tcp->data);
     SessionImplUV* thiz = static_cast<SessionImplUV*>(tcp->data);
     WTF_CHECK(thiz);
@@ -45,6 +47,7 @@ void SessionImplUV::OnRead(uv_stream_t *tcp, ssize_t nread, const uv_buf_t *buf)
         size_t nparsed = http_parser_execute(&(thiz->parser_), &(thiz->settings_), buf->base, nread);
         WTF_CHECK(nparsed == nread);
     } else {
+        thiz->OnRecvComplete();
         /* EOF */
         uv_close((uv_handle_t*)tcp, SessionImplUV::OnClose);
     }
@@ -53,6 +56,7 @@ void SessionImplUV::OnRead(uv_stream_t *tcp, ssize_t nread, const uv_buf_t *buf)
 }
 // | static | uv |
 void SessionImplUV::OnResolved(uv_getaddrinfo_t *resolver, int status, struct addrinfo *res) {
+    WTF_LOG(INFO) << "OnResolved";
     WTF_CHECK(resolver->data);
     SessionImplUV* thiz = static_cast<SessionImplUV*>(resolver->data);
     WTF_CHECK(thiz);
@@ -70,6 +74,7 @@ void SessionImplUV::OnResolved(uv_getaddrinfo_t *resolver, int status, struct ad
 }
 // | static | http-parser |
 int SessionImplUV::OnHttpParserBody(http_parser *parser, const char *p, size_t len) {
+    WTF_LOG(INFO) << "OnHttpParserBody";
     WTF_CHECK(parser->data);
     SessionImplUV* thiz = static_cast<SessionImplUV*>(parser->data);
     WTF_CHECK(thiz);
@@ -78,15 +83,24 @@ int SessionImplUV::OnHttpParserBody(http_parser *parser, const char *p, size_t l
 }
 // | static | http-parser |
 int SessionImplUV::OnHttpParserMessageComplete(http_parser* parser) {
+    WTF_LOG(INFO) << "OnHttpParserMessageComplete";
+    WTF_CHECK(parser->data);
+    SessionImplUV* thiz = static_cast<SessionImplUV*>(parser->data);
+    WTF_CHECK(thiz);
+    return 0;
+}
+// | static | http-parser |
+int SessionImplUV::OnHttpParserHeaderComplete(http_parser* parser) {
+    WTF_LOG(INFO) << "OnHttpParserHeaderComplete";
     WTF_CHECK(parser->data);
     SessionImplUV* thiz = static_cast<SessionImplUV*>(parser->data);
     WTF_CHECK(thiz);
 
-    thiz->OnRecvComplete();
     return 0;
 }
 // | static | http-parser |
 int SessionImplUV::OnHttpParserHeaderField(http_parser* parser, const char* field, size_t len) {
+    WTF_LOG(INFO) << "OnHttpParserHeaderField";
     WTF_CHECK(parser->data);
     SessionImplUV* thiz = static_cast<SessionImplUV*>(parser->data);
     WTF_CHECK(thiz);
@@ -96,6 +110,7 @@ int SessionImplUV::OnHttpParserHeaderField(http_parser* parser, const char* fiel
 }
 // | static | http-parser |
 int SessionImplUV::OnHttpParserHeaderValue(http_parser* parser, const char* value, size_t len) {
+    WTF_LOG(INFO) << "OnHttpParserHeaderValue";
     WTF_CHECK(parser->data);
     SessionImplUV* thiz = static_cast<SessionImplUV*>(parser->data);
     WTF_CHECK(thiz);
@@ -105,6 +120,7 @@ int SessionImplUV::OnHttpParserHeaderValue(http_parser* parser, const char* valu
 }
 // | static | http-parser |
 int SessionImplUV::OnHttpParserStatus(http_parser* parser, const char* status, size_t len) {
+    WTF_LOG(INFO) << "OnHttpParserStatus";
     WTF_CHECK(parser->data);
     SessionImplUV* thiz = static_cast<SessionImplUV*>(parser->data);
     WTF_CHECK(thiz);
@@ -115,6 +131,7 @@ int SessionImplUV::OnHttpParserStatus(http_parser* parser, const char* status, s
 }
 
 int SessionImplUV::Write(uv_stream_t * stream) {
+    WTF_LOG(INFO) << "Write";
     request_.PreparePayload();
 
     uv_buf_t http = uv_buf_init((char *)request_.raw.data(), request_.raw.size());
@@ -123,7 +140,7 @@ int SessionImplUV::Write(uv_stream_t * stream) {
 }
 
 int SessionImplUV::Connect(const struct sockaddr* res) {
-
+    WTF_LOG(INFO) << "Connect";
     uv_tcp_init(loop_, &socket_);
 
     connReq_.data = this;
@@ -132,12 +149,13 @@ int SessionImplUV::Connect(const struct sockaddr* res) {
 }
 
 int SessionImplUV::DoInit() {
-
+    WTF_LOG(INFO) << "DoInit";
     loop_ = uv_default_loop();
 
     http_parser_init(&parser_, HTTP_RESPONSE);
     parser_.data = this;
     settings_.on_status = SessionImplUV::OnHttpParserStatus;
+    settings_.on_headers_complete = SessionImplUV::OnHttpParserHeaderComplete;
     settings_.on_message_complete = SessionImplUV::OnHttpParserMessageComplete;
     settings_.on_header_field = SessionImplUV::OnHttpParserHeaderField;
     settings_.on_header_value = SessionImplUV::OnHttpParserHeaderValue;

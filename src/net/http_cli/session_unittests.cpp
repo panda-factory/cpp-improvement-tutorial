@@ -32,6 +32,31 @@ TEST(SessionTest, Session_GET_0) {
     ASSERT_EQ(status, "OK");
 }
 
+TEST(SessionTest, Session_GET_1) {
+    using namespace http;
+    Session session;
+    session.Init();
+    std::string status;
+    session.Get(
+            Url("http://www.so.com/status.html"),
+            ResponseHandler([&](auto&& resp) {
+                status = resp.status;
+            }));
+    ASSERT_EQ(status, "OK");
+}
+
+TEST(SessionTest, Session_HEAD_0) {
+    using namespace http;
+    Session session;
+    session.Init();
+    std::string status;
+    session.Head(
+            Url("http://httpbin.org/anything"),
+            ResponseHandler([&](auto&& resp) {
+                status = resp.status;
+            }));
+    ASSERT_EQ(status, "OK");
+}
 #if 0
 TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
     using namespace http;
@@ -44,18 +69,5 @@ TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
                 error = resp.error;
             }));
     ASSERT_EQ(error, ErrorCode::OK);
-}
-
-TEST(SessionTest, Session_REDIRECTORY) {
-    using namespace http;
-    Session session;
-    session.Init();
-    std::string status;
-    session.Get(
-            Url("http://www.so.com/status.html"),
-            ResponseHandler([&](auto&& resp) {
-                status = resp.status;
-            }));
-    ASSERT_EQ(status, "OK");
 }
 #endif

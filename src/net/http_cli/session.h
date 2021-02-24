@@ -16,6 +16,9 @@ public:
     template<typename... Ts>
     void Get(Ts&&... ts);
 
+    template<typename... Ts>
+    void Head(Ts&&... ts);
+
     template<typename T>
     void SetOption(T&& t);
 
@@ -33,8 +36,13 @@ private:
 
 template<typename... Ts>
 void Session::Get(Ts&&... ts) {
-    SetOption(std::forward<Ts>(ts)...);
-    SetOption(Method("GET"));
+    SetOption(Method("GET"), std::forward<Ts>(ts)...);
+    impl_->DoRequest();
+}
+
+template<typename... Ts>
+void Session::Head(Ts&&... ts) {
+    SetOption(Method("HEAD"), std::forward<Ts>(ts)...);
     impl_->DoRequest();
 }
 
