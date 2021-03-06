@@ -9,6 +9,10 @@
 #include "http_parser.h"
 #include "uv.h"
 
+#if __ENABLE_HTTPS__
+#include <openssl/ssl.h>
+#endif
+
 namespace http {
 class SessionImplUV : public SessionImpl {
 public:
@@ -64,17 +68,35 @@ private:
     static void OnRead(uv_stream_t *tcp, ssize_t nread, const uv_buf_t *buf);
 
     int Connect(const struct sockaddr*);
+
     int OnRecvBody(const char *p, size_t len);
+
     int OnRecvComplete();
+
     void OnResponse(Response&& response);
+
     int Resolve();
-    int Write(uv_stream_t * stream);
+
+    void Write(uv_buf_t* buffer);
+
+#if __ENABLE_HTTPS__
+    void FlushReadBio();
+    void HandleError(int result);
+    void ReadFromSSL(const uv_buf_t *buf, ssize_t raw_size);
+#endif
 
     std::string field_;
     Request request_;
     std::ostringstream bodyStream_;
     Response response_;
     ResponseHandler responseHandler_;
+
+#if __ENABLE_HTTPS__
+    SSL_CTX* ssl_ctx_ = nullptr;
+    SSL * ssl_ = nullptr;
+    BIO * read_bio_ = nullptr;
+    BIO * write_bio_ = nullptr;
+#endif
 
     // | Field |
     struct addrinfo hints_;

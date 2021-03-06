@@ -19,6 +19,21 @@ TEST(SessionTest, Session_GET_HTTP_BAIDU) {
     ASSERT_EQ(error, ErrorCode::OK);
 }
 
+#if __ENABLE_HTTPS__
+TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
+    using namespace http;
+    Session session;
+    session.Init();
+    Error error;
+    session.Get(
+            Url("https://www.baidu.com"),
+            ResponseHandler([&](auto&& resp) {
+                error = resp.error;
+            }));
+    ASSERT_EQ(error, ErrorCode::OK);
+}
+#endif // __ENABLE_HTTPS__
+
 TEST(SessionTest, Session_GET_0) {
     using namespace http;
     Session session;
@@ -57,17 +72,3 @@ TEST(SessionTest, Session_HEAD_0) {
             }));
     ASSERT_EQ(status, "OK");
 }
-#if 0
-TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
-    using namespace http;
-    Session session;
-    session.Init();
-    Error error;
-    session.Get(
-            Url("https://www.baidu.com"),
-            ResponseHandler([&](auto&& resp) {
-                error = resp.error;
-            }));
-    ASSERT_EQ(error, ErrorCode::OK);
-}
-#endif

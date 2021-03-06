@@ -8,6 +8,7 @@ PROJECT(test VERSION 0.0.0
 OPTION(USE_LIBEVENT "choose to use libevent" OFF)
 OPTION(USE_LIBUV "choose to use libuv" ON)
 OPTION(USE_BEAST "choose to user beast" OFF)
+OPTION(ENABLE_HTTPS "enable https" ON)
 
 if(USE_LIBEVENT)
     MESSAGE("choose to use libevent")
@@ -42,9 +43,13 @@ INCLUDE_DIRECTORIES("${PROJECT_ROOT_PATH}/include/")
 LINK_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib/")
 
 # For Openssl
-SET(OPENSSL_ROOT_DIR "${PROJECT_SOURCE_DIR}/third_party/openssl-1.1.1i")
-FIND_PACKAGE(OpenSSL REQUIRED)
-MESSAGE("OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
+if (ENABLE_HTTPS)
+    MESSAGE("enable https")
+    ADD_DEFINITIONS(-D__ENABLE_HTTPS__=1)
+    SET(OPENSSL_ROOT_DIR "${PROJECT_SOURCE_DIR}/third_party/openssl-1.1.1i")
+    FIND_PACKAGE(OpenSSL REQUIRED)
+    MESSAGE("OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
+endif ()
 
 ADD_SUBDIRECTORY(src)
 #add_custom_target(mytest COMMAND mingw32-make -C third_party/http-parser
