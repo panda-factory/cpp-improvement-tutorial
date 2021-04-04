@@ -1,0 +1,74 @@
+---
+title: RAII
+type: book-zh-cn
+order: 2
+---
+
+# 第2章 最简单、通用的单例模式
+
+[TOC]
+
+## 2.1 单例模式
+单例模式不仅是设计模式中的基本概念，还是很多面试最喜欢问的一个问题。对于概念之类的，本文不会做过多的解释，不清楚的建议还是查一下（底层的编程人员，往往用就是用了，却不知道为什么用，怎么用）。
+
+## 2.2 线程安全
+C++中，单例模式最容易被问到的问题就是“如何保证线程安全”。熊猫在国内某大厂工作，就经常看到组内兄弟喜欢用这样模式的单例模式：
+```C++
+class Singleton {
+public:
+    static Singleton* GetInstance() {
+        if (instance_ == nullptr)
+            instance_ = new Singleton();
+        
+        return instance_
+    }
+private:
+    SingleInstance(); // 禁止非类域构造。
+    static Singleton* instance_; // 静态域单例实例。
+}
+```
+踩过坑的兄弟一眼就可以看出问题，在GetInstance()函数中，并没有做防重入处理。在首次初始化的时候如果有多个线程重入，必然会出问题。为了解决单例模式的线程安全问题，有很多方法，包括不局限于：std::mutex加锁；pthread_once确保单例只被构造一次。但线程安全问题只出现在首次初始化的时候，用了这么多手段，就有点大炮打蚊子的感觉，尤其是加了锁之后，会带来不少性能消耗。有兴趣的可以参考这篇文章[《单例模式很简单？你真的能写对吗》](https://mp.weixin.qq.com/s?__biz=MzI2OTA3NTk3Ng==&mid=2649285320&idx=1&sn=96bd11cf524606f2bbb09ae1cf5df3ca&chksm=f2f991afc58e18b93e37c0a45a81cd47a7440cac2a43cab7aabf6b8525c72fcd4c9d4b3eaba8&scene=21#wechat_redirect)。
+
+## 2.3 最简单的线程安全单例模式
+早在C++11规范出来时，就有静态变量线程安全的概念，C++memory model中对static local variable有如下描述：
+
+`The initialization of such a variable is defined to occur the first time control passes through its declaration; for multiple threads calling the function, this means there’s the potential for a race condition to define first.`
+
+实现如下：
+```C++
+class Singleton {
+public:
+    static Singleton& GetInstance(){
+        static Singleton instance;  // 线程安全的局部静态变量
+        return instance;
+    }
+    Singleton(const Singleton& other) = delete;
+    Singleton& operator=(const Singleton& other) = delete;
+private:
+    Singleton() = default;
+    ~Singleton() = default;
+};
+```
+这里需要注意的只有复制构造函数跟赋值构造函数需要显示删除，避免被不必要的调用。
+
+## 2.4 最简单的线程安全通用单例模式
+既然是单例模式，那么就可以为上述的方法提供一种通用模板。需要使用的类只需要继承即可。
+```C++
+template<typename T>
+class Singleton
+{
+public:
+    static T& GetInstance() {
+        static T t;
+        return t;
+    }
+    
+    Singleton(const Singleton&) = delete; 
+    Singleton& operator=(const Singleton&) = delete; 
+protected:
+    Singleton() = default;
+    ~Singleton() = default;
+};
+```
+
+更多精彩，请持续关注。
