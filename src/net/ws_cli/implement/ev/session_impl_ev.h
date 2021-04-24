@@ -9,8 +9,8 @@
 
 #include "net/ws_cli/session_impl.h"
 #include "net/ws_cli/header.h"
-#include "net/ws_cli/implement/ev/ws_state.h"
-#include "ws_types.h"
+#include "net/ws_cli/ws_state.h"
+#include "net/ws_cli/ws_types.h"
 #include "utf8_utils.h"
 
 #include <event2/dns.h>
@@ -18,16 +18,18 @@
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 
+namespace net {
 namespace ws {
 class SessionImplEV : public SessionImpl {
 public:
     int DoClose() override;
-    int DoConnect(const std::string& server, int port, const std::string& uri) override;
+    int DoConnect() override;
     int DoInit() override;
     int DoSendMsg(const std::string& msg) override;
 
-    void SetHandler(const ConnectHandler& onConnect) override;
-    void SetHandler(const MessageHandler& onMessage) override;
+    void SetHandler(const ConnectHandler&& connect_handler) override;
+    void SetHandler(const MessageHandler&& message_handler) override;
+    void SetUrl(const Url &url) override;
 
     SessionImplEV() = default;
 private:
@@ -149,6 +151,7 @@ private:
 };
 
 } // namespace ws
+} // namespace net
 
 
 #endif //TEST_WEB_SOCKET_CLI_SESSION_IMPL_EV_H

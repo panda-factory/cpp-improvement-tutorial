@@ -7,6 +7,7 @@
 
 #include <functional>
 
+namespace net {
 namespace ws {
 class ConnectHandler {
 public:
@@ -20,5 +21,6 @@ private:
     std::function<void()> handler_ = nullptr;
 };
 } // namespace ws
+} // namespace net
 
 #endif //TEST_CONNECTHANDLER_H

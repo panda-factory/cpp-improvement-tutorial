@@ -6,6 +6,8 @@
 #define TEST_ERROR_H
 #include <string>
 #include <sstream>
+
+namespace net {
 namespace http {
 enum class ErrorCode : unsigned int {
     OK = 0,
@@ -31,6 +33,7 @@ enum class ErrorCode : unsigned int {
 class Error {
 public:
     Error();
+
     Error(ErrorCode code);
 
     explicit operator bool() const {
@@ -39,13 +42,13 @@ public:
 
     ErrorCode code_;
 
-    bool operator == (const ErrorCode& code) const;
+    bool operator==(const ErrorCode &code) const;
 
     //! Converts Error to human readable std::string
     operator std::string() const;
 };
 
 } // namespace http
-
+} // namespace net
 
 #endif //TEST_ERROR_H

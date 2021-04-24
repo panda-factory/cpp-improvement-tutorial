@@ -8,6 +8,7 @@
 
 #include <functional>
 
+namespace net {
 namespace ws {
 class MessageHandler {
 public:
@@ -22,6 +23,7 @@ private:
     bool isValid_ = false;
     std::function<void(char *msg, uint64_t len, int binary, void *arg)> handler_ = nullptr;
 };
-}
+} // namespace ws
+} // namespace net
 
 #endif //TEST_MESSAGE_HANDLER_H

@@ -3,6 +3,8 @@
 //
 
 #include "timeout.h"
+namespace net {
 namespace http {
 
 } //namespace http
+} // namespace net

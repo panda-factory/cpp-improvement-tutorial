@@ -7,15 +7,12 @@
 #include <string>
 
 #include "core/macros.h"
-namespace http {
+
+namespace net {
 struct Url {
 
     //! Wether the url requires TLS
     bool IsHttps() const;
-
-    Url(const std::string& url);
-
-    Url() = default;
 
     std::string url;
     //!
@@ -35,11 +32,16 @@ struct Url {
 
     //!
     std::string fragment;
+
+    Url(const std::string &url);
+
+    Url() = default;
+
 private:
     void ParseUrl();
 
     //WTF_DISALLOW_COPY_AND_ASSIGN(Url);
 };
-} //namespace http
+} // namespace net
 
 #endif //TEST_URL_H

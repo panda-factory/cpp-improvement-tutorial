@@ -6,8 +6,9 @@
 #define TEST_WSHEADER_H
 
 #include <memory>
-#include "ws_types.h"
+#include "net/ws_cli/ws_types.h"
 
+namespace net {
 namespace ws {
 
 inline bool IsControlOpcode(const uint8_t code) {
@@ -33,6 +34,7 @@ inline bool IsReservedOpcode(const uint8_t code) {
             IsReservedNonControlOpcode(code);
 }
 void PackHeader(WSHeader& h, uint8_t *b, size_t len, size_t *header_len);
-}// namespace ws
+} // namespace ws
+} // namespace net
 
 #endif //TEST_WSHEADER_H

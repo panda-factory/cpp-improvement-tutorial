@@ -7,11 +7,13 @@
 #include "core/logging.h"
 
 TEST(WSSessionTest, Hello) {
+    using namespace net;
+    using namespace net::ws;
     std::string msgRecv;
-    using namespace ws;
     Session session;
     session.Init();
     session.SetOption(
+            Url("ws://123.207.136.134:9010/ajaxchattest"),
             ConnectHandler([&] () {
                 session.SendMsg("hello");
             }),
@@ -19,16 +21,19 @@ TEST(WSSessionTest, Hello) {
                 msgRecv = msg;
                 session.Close();
             }));
-    session.Connect("123.207.136.134", 9010, "ajaxchattest");
+    session.Connect();
     ASSERT_EQ(msgRecv, "hello [<a href='http://coolaf.com/tool/chattest'>http://coolaf.com</a>]");
 }
+#if 0
 TEST(WSSessionTest, Session_WS) {
+    using namespace net;
+    using namespace net::ws;
     std::string msgRecv;
     bool isFinish = false;
-    using namespace ws;
     Session session;
     session.Init();
     session.SetOption(
+            Url("ws://123.207.136.134:9010/ajaxchattest"),
             ConnectHandler([&] () {
                 session.SendMsg("hello");
             }),
@@ -41,6 +46,7 @@ TEST(WSSessionTest, Session_WS) {
                     session.Close();
                 }
             }));
-    session.Connect("123.207.136.134", 9010, "ajaxchattest");
+    session.Connect();
     ASSERT_EQ(msgRecv, "Nice to see you again. [<a href='http://coolaf.com/tool/chattest'>http://coolaf.com</a>]");
 }
+#endif

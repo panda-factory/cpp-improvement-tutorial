@@ -8,6 +8,7 @@
 #include <cctype>
 #include <map>
 
+namespace net {
 namespace ws {
 struct CaseInsensitiveCompare {
     bool operator()(const std::string& a, const std::string& b) const noexcept {
@@ -19,5 +20,6 @@ struct CaseInsensitiveCompare {
 using Header = std::map<std::string, std::string, CaseInsensitiveCompare>;
 
 } //namespace ws
+} // namespace net
 
 #endif //TEST_WS_CLI_HEADER_H

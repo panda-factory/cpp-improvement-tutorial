@@ -10,6 +10,7 @@
 #include "util.h"
 
 
+namespace net {
 namespace ws {
 namespace {
 
@@ -111,4 +112,18 @@ int GetRandomMask(unsigned char *buf, size_t len) {
     return i;
 }
 
+void MaskPayload(uint32_t mask, char *msg, uint64_t len)
+{
+    uint8_t *m = (uint8_t *)&mask;
+    uint8_t *p = (uint8_t *)msg;
+
+    if (!msg || !len)
+        return;
+
+    for (size_t i = 0; i < len; i++) {
+        p[i] ^= m[i % 4];
+    }
+}
+
 } // namespace ws
+} // namespace net

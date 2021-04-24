@@ -1,1 +1,5 @@
-ADD_SUBDIRECTORY(ev)
+if (USE_LIBEVENT)
+    ADD_SUBDIRECTORY(ev)
+elseif (USE_LIBUV)
+    ADD_SUBDIRECTORY(uv)
+endif ()

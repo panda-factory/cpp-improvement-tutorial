@@ -9,6 +9,7 @@
 
 #include "session_impl.h"
 
+namespace net {
 namespace ws {
 class Session {
 public:
@@ -16,7 +17,7 @@ public:
 
     int Close();
 
-    int Connect(const std::string& server, int port, const std::string& uri);
+    int Connect();
 
     int SendMsg(const std::string& msg);
 
@@ -45,5 +46,6 @@ void Session::SetOption(T&& t, Ts&&... ts) {
 }
 
 } //namespace ws
+} // namespace net
 
 #endif //TEST_WEB_SOCKET_CLI_SESSION_H

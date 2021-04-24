@@ -7,6 +7,7 @@
 
 #include "net/http_cli/session_impl.h"
 
+namespace net {
 namespace http {
 
 class Session {
@@ -59,5 +60,6 @@ void Session::SetOption(T&& t, Ts&&... ts) {
 
 
 } // namespace http
+} // namespace net
 
 #endif //TEST_SESSION_H

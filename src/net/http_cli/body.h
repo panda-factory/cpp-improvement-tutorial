@@ -4,12 +4,14 @@
 
 #ifndef TEST_BODY_H
 #define TEST_BODY_H
+
+namespace net {
 namespace http {
 
 class body {
 
 };
-} //namespace http
-
+} // namespace http
+} // namespace net
 
 #endif //TEST_BODY_H

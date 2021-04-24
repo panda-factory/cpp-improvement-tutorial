@@ -13,9 +13,11 @@
 #include <functional>
 #include <iostream>
 
+namespace net {
 namespace http {
 
-void Cookies::ParseCookieString(const std::string& cookie_str) {
+void Cookies::ParseCookieString(const std::string &cookie_str) {
 
 }
-} //namespace http
+} // namespace http
+} // namespace net

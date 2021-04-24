@@ -10,22 +10,19 @@
 #include "core/macros.h"
 #include "net/http_cli/cookies.h"
 #include "net/http_cli/error.h"
-#include "net/http_cli/header.h"
-#include "net/http_cli/url.h"
+#include "net/header.h"
+#include "net/url.h"
 
+namespace net {
 namespace http {
-/**
- * \brief Passed to the unary callback xxhr::on_response.
- *        Provides access to request Content and Success, HTTP Status Codes or Errors.
- */
+
 struct Response {
 public:
 
-
     Response() = default;
 
-    Response(const std::int32_t &status_code, Error error, const std::string& body, const Header& header,
-             const Url& url, Cookies &&cookies = Cookies{});
+    Response(const std::int32_t &status_code, Error error, const std::string &body, const Header &header,
+             const Url &url, Cookies &&cookies = Cookies{});
 
     //! HTTP Status Code as Specified in [HTTP RFC](https://tools.ietf.org/html/rfc7231#section-6.1).
     std::int32_t statusCode;
@@ -48,17 +45,20 @@ public:
     Cookies cookies;
 
 };
+
 class ResponseHandler {
 public:
-    void operator()(Response&& response);
+    void operator()(Response &&response);
 
-    explicit ResponseHandler(std::function<void(Response&&)> handler);
+    explicit ResponseHandler(std::function<void(Response &&)> handler);
+
     ResponseHandler() = default;
+
 private:
-    std::function<void(Response&&)> handler_ = nullptr;
+    std::function<void(Response &&)> handler_ = nullptr;
 };
 
 } // namespace http
-
+} // namespace net
 
 #endif //TEST_RESPONSE_H

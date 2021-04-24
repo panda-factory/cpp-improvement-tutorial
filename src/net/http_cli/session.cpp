@@ -14,13 +14,14 @@
 #include "implement/uv/session_impl_uv.h"
 #endif
 
+namespace net {
 namespace http {
 Session::Session() {
-#if (USE_HTTP_BEAST)
+#if USE_HTTP_BEAST
     impl_ = std::make_shared<SessionImplBeast>();
-#elif (__USE_LIBEVENT__)
+#elif __USE_LIBEVENT__
     impl_ = std::make_shared<SessionImplEV>();
-#elif (__USE_LIBUV__)
+#elif __USE_LIBUV__
     impl_ = std::make_shared<SessionImplUV>();
 #endif
 }
@@ -33,3 +34,4 @@ void Session::Request() {
     impl_->DoRequest();
 }
 } // namespace http
+} // namespace net

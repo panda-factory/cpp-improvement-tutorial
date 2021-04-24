@@ -6,22 +6,10 @@
 #include "session.h"
 #include "core/logging.h"
 
-TEST(SessionTest, Session_GET_HTTP_BAIDU) {
-    using namespace http;
-    Session session;
-    session.Init();
-    Error error;
-    session.Get(
-            Url("http://www.baidu.com"),
-            ResponseHandler([&](auto&& resp) {
-                error = resp.error;
-            }));
-    ASSERT_EQ(error, ErrorCode::OK);
-}
-
 #if __ENABLE_HTTPS__
 TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
-    using namespace http;
+    using namespace net;
+    using namespace net::http;
     Session session;
     session.Init();
     Error error;
@@ -34,8 +22,23 @@ TEST(SessionTest, Session_GET_HTTPS_BAIDU) {
 }
 #endif // __ENABLE_HTTPS__
 
+TEST(SessionTest, Session_GET_HTTP_BAIDU) {
+    using namespace net;
+    using namespace net::http;
+    Session session;
+    session.Init();
+    Error error;
+    session.Get(
+            Url("http://www.baidu.com"),
+            ResponseHandler([&](auto&& resp) {
+                error = resp.error;
+            }));
+    ASSERT_EQ(error, ErrorCode::OK);
+}
+
 TEST(SessionTest, Session_GET_0) {
-    using namespace http;
+    using namespace net;
+    using namespace net::http;
     Session session;
     session.Init();
     std::string status;
@@ -48,7 +51,8 @@ TEST(SessionTest, Session_GET_0) {
 }
 
 TEST(SessionTest, Session_GET_1) {
-    using namespace http;
+    using namespace net;
+    using namespace net::http;
     Session session;
     session.Init();
     std::string status;
@@ -61,12 +65,13 @@ TEST(SessionTest, Session_GET_1) {
 }
 
 TEST(SessionTest, Session_HEAD_0) {
-    using namespace http;
+    using namespace net;
+    using namespace net::http;
     Session session;
     session.Init();
     std::string status;
     session.Head(
-            Url("http://httpbin.org/anything"),
+            Url("http://httpbin.org/"),
             ResponseHandler([&](auto&& resp) {
                 status = resp.status;
             }));

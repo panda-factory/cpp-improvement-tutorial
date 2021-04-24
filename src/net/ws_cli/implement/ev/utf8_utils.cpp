@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+namespace net {
 namespace ws {
 namespace {
 // Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
@@ -77,3 +78,4 @@ Utf8State ValidateUtf8(Utf8State *state,
 }
 
 } // namespace ws
+} // namespace net

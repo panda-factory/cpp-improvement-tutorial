@@ -4,11 +4,13 @@
 
 #ifndef TEST_MAXREDIRECTS_H
 #define TEST_MAXREDIRECTS_H
+namespace net {
 namespace http {
 
 class MaxRedirects {
 
 };
-} //namespace http
+} // namespace http
+} // namespace net
 
 #endif //TEST_MAXREDIRECTS_H

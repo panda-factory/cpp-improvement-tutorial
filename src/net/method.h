@@ -7,9 +7,9 @@
 
 #include <string>
 
-namespace http {
+namespace net {
 using Method = std::string;
 
-} //namespace http
+} //namespace net
 
 #endif //TEST_METHOD_H

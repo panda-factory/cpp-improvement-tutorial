@@ -4,6 +4,7 @@
 
 #ifndef TEST_WS_STATE_H
 #define TEST_WS_STATE_H
+namespace net {
 namespace ws {
 enum class WSSendState {
     NONE,
@@ -115,4 +116,5 @@ enum class WSCloseStatus {
     FAILED_TLS_HANDSHAKE_1015 = 1015
 };
 } // namespace ws
+} // namespace net
 #endif //TEST_WS_STATE_H

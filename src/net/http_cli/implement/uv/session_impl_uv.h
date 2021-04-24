@@ -12,7 +12,7 @@
 #if __ENABLE_HTTPS__
 #include <openssl/ssl.h>
 #endif
-
+namespace net {
 namespace http {
 class SessionImplUV : public SessionImpl {
 public:
@@ -98,7 +98,7 @@ private:
     BIO * write_bio_ = nullptr;
 #endif
 
-    // | Field |
+    // | libuv |
     struct addrinfo hints_;
     uv_loop_t* loop_;
     uv_getaddrinfo_t resolver_;
@@ -109,5 +109,6 @@ private:
     http_parser_settings settings_;
 };
 } // namespace http
+} // namespace net
 
 #endif //TEST_SESSION_IMPL_UV_H

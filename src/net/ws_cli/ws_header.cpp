@@ -13,6 +13,7 @@
 #include <winsock.h>
 #endif
 
+namespace net {
 namespace ws {
 namespace {
 void PackHeaderFirstByte(WSHeader *h, uint8_t *b) {
@@ -104,5 +105,5 @@ void PackHeader(WSHeader& h, uint8_t *b, size_t len, size_t *header_len) {
     PackHeaderRest(&h, b, len, header_len);
 }
 
-};
-// namespace ws
+} // namespace ws
+} // namespace net

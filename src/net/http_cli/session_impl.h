@@ -5,9 +5,8 @@
 #ifndef TEST_SESSION_IMPL_H
 #define TEST_SESSION_IMPL_H
 
-#include "net/http_cli/url.h"
 #include "net/http_cli/parameters.h"
-#include "net/http_cli/header.h"
+#include "net/header.h"
 #include "net/http_cli/timeout.h"
 #include "net/http_cli/authentication.h"
 #include "net/http_cli/digest.h"
@@ -16,11 +15,13 @@
 #include "net/http_cli/cookies.h"
 #include "net/http_cli/body.h"
 #include "net/http_cli/response.h"
-#include "net/http_cli/method.h"
 #include "net/http_cli/retries.h"
-#include "net/http_cli/request.h"
+#include "net/method.h"
+#include "net/url.h"
+#include "net/request.h"
 #include "retries.h"
 
+namespace net {
 namespace http {
 class SessionImpl {
 public:
@@ -99,6 +100,7 @@ public:
 
     virtual ~SessionImpl() {}
 };
-} //namespace http
+} // namespace http
+} // namespace net
 
 #endif //TEST_SESSION_IMPL_H

@@ -5,6 +5,7 @@
 #ifndef TEST_PARAMETERS_H
 #define TEST_PARAMETERS_H
 #include <string>
+namespace net {
 namespace http {
 
 struct Parameters {
@@ -12,5 +13,6 @@ struct Parameters {
 };
 
 } // namespace http
+} // namespace net
 
 #endif //TEST_PARAMETERS_H

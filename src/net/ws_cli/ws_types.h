@@ -7,8 +7,9 @@
 
 #include <functional>
 
-#include "ws_state.h"
+#include "net/ws_cli/ws_state.h"
 
+namespace net {
 namespace ws {
 constexpr int WS_DEFAULT_CONNECT_TIMEOUT = 60;
 constexpr int HTTP_STATUS_SWITCHING_PROTOCOLS_101 = 101;
@@ -127,4 +128,5 @@ using MsgCallback = void (*)(char *msg, uint64_t len,
 using MsgFrameEndCallback = void (*)(void *arg);
 using ConnectHandle = std::function<void(void *arg)>;
 } // namespace ws
+} // namespace net
 #endif //TEST_WS_TYPES_H

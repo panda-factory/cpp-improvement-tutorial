@@ -3,6 +3,8 @@
 //
 
 #include "maxRedirects.h"
+namespace net {
 namespace http {
 
-} //namespace http
+} // namespace http
+} // namespace net

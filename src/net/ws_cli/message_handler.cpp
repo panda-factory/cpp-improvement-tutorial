@@ -4,6 +4,7 @@
 
 #include "message_handler.h"
 
+namespace net {
 namespace ws {
 MessageHandler::MessageHandler(std::function<void(char *msg, uint64_t len, int binary, void *arg)> handler)
         : handler_(handler) {
@@ -21,3 +22,4 @@ void MessageHandler::operator()(char *msg, uint64_t len, int binary, void *arg) 
 }
 
 } // namespace ws
+} // namespace net

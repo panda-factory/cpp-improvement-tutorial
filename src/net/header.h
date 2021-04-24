@@ -8,7 +8,7 @@
 #include <cctype>
 #include <map>
 
-namespace http {
+namespace net {
 struct CaseInsensitiveCompare {
     bool operator()(const std::string& a, const std::string& b) const noexcept {
         return std::lexicographical_compare(
@@ -18,7 +18,7 @@ struct CaseInsensitiveCompare {
 };
 using Header = std::map<std::string, std::string, CaseInsensitiveCompare>;
 
-} //namespace http
+} //namespace net
 
 
 #endif //TEST_HTTP_CLI_HEADER_H

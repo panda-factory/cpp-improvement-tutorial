@@ -4,8 +4,9 @@
 
 #include "request.h"
 #include "core/fmt_string.h"
+#include "core/logging.h"
 
-namespace http {
+namespace net {
 void Request::PreparePayload() {
     raw = wtf::FmtString("%s %s HTTP/%d.%d\r\n",
                           method.c_str(),
@@ -14,8 +15,11 @@ void Request::PreparePayload() {
     raw += wtf::FmtString("Host: %s\r\n",
                           url.host.c_str());
 
-
+    for (const auto& it : header) {
+        raw += wtf::FmtString("%s: %s\r\n", it.first.c_str(), it.second.c_str());
+    }
 
     raw += "\r\n";
+    WTF_LOG(INFO) << raw;
 }
-} // namespace http
+} // namespace net

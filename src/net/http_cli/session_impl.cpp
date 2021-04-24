@@ -3,6 +3,7 @@
 //
 #include "session_impl.h"
 
+namespace net {
 namespace http {
 // Used in templated functions
 void SessionImpl::SetOption(const Url &url) {
@@ -73,3 +74,4 @@ void SessionImpl::SetOption(const ResponseHandler&& onResponse) {
     SetHandler(std::move(onResponse));
 }
 } // namespace http
+} // namespace net

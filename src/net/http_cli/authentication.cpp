@@ -3,6 +3,8 @@
 //
 
 #include "authentication.h"
+namespace net {
 namespace http {
 
-}
+} // namespace http
+} // namespace net

@@ -4,6 +4,7 @@
 
 #include "connect_handler.h"
 
+namespace net {
 namespace ws {
 ConnectHandler::ConnectHandler(std::function<void()> handler)
     : handler_(handler) {
@@ -17,3 +18,4 @@ void ConnectHandler::operator()() {
 }
 
 } // namespace ws
+} // namespace net

@@ -21,6 +21,7 @@ extern "C" {
 #endif // __cplusplus
 #endif // __ENABLE_HTTPS__
 
+namespace net {
 namespace http {
 namespace {
 
@@ -72,7 +73,7 @@ int dummy_ssl_verify_callback(int ok, X509_STORE_CTX* store) {
     X509_NAME* cert_name = X509_get_subject_name(err_cert);
     X509_NAME_print_ex(outbio, cert_name, 0, XN_FLAG_MULTILINE);
     BIO_free_all(outbio);
-    printf("\tssl_verify_callback(), ok: %d, error: %d, depth: %d, name: %s\n", ok, err, depth, buf);
+    WTF_LOG(INFO) << wtf::FmtString("\tssl_verify_callback(), ok: %d, error: %d, depth: %d, name: %s\n", ok, err, depth, buf);
 
     return 1;  // We always return 1, so no verification actually
 }
@@ -80,8 +81,8 @@ int dummy_ssl_verify_callback(int ok, X509_STORE_CTX* store) {
 // | static | uv |
 void SessionImplUV::OnAlloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
     WTF_LOG(INFO) << "OnAlloc";
-    void *ptr;
-    ptr = malloc(suggested_size);
+    void *ptr = malloc(suggested_size);
+    WTF_CHECK(ptr != nullptr);
     buf->base = (char *)ptr;
     buf->len = suggested_size;
 }
@@ -120,7 +121,7 @@ void SessionImplUV::OnClose(uv_handle_t* handle) {
 }
 // | static | uv |
 void SessionImplUV::OnRead(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf) {
-    WTF_LOG(INFO) << "OnRead";
+    WTF_LOG(INFO) << "OnRead size=" << nread;
     WTF_CHECK(stream->data);
     SessionImplUV* thiz = static_cast<SessionImplUV*>(stream->data);
     WTF_CHECK(thiz);
@@ -218,6 +219,7 @@ int SessionImplUV::OnHttpParserStatus(http_parser* parser, const char* status, s
     return 0;
 }
 
+#if __ENABLE_HTTPS__
 void SessionImplUV::ReadFromSSL(const uv_buf_t *buf, ssize_t raw_size) {
     BIO_write(read_bio_, buf->base, raw_size);
     if (!SSL_is_init_finished(ssl_)) {
@@ -238,11 +240,15 @@ void SessionImplUV::ReadFromSSL(const uv_buf_t *buf, ssize_t raw_size) {
         SessionImplUV::OnAlloc(nullptr, raw_size, &ssl_buff);
         uv_buf_init(ssl_buff.base, ssl_buff.len);
         int size = SSL_read(ssl_, ssl_buff.base, ssl_buff.len);
-        size_t nparsed = http_parser_execute(&(parser_), &(settings_), ssl_buff.base, size);
-        WTF_CHECK(nparsed == size);
+        if (size != -1) {
+            size_t nparsed = http_parser_execute(&(parser_), &(settings_), ssl_buff.base, size);
+            WTF_CHECK(nparsed == size)
+            << wtf::FmtString("buffer size=%u, SSL_read size=%d, http_parse size=%d", raw_size, size, nparsed);
+        }
     }
 }
-#if __ENABLE_HTTPS__
+#endif // __ENABLE_HTTPS__
+
 void SessionImplUV::Write(uv_buf_t* buffer) {
     WTF_LOG(INFO) << "Write";
 
@@ -251,7 +257,7 @@ void SessionImplUV::Write(uv_buf_t* buffer) {
         WTF_LOG(ERROR) << wtf::FmtString("write_to_socket error");
     }
 }
-#endif // __ENABLE_HTTPS__
+
 int SessionImplUV::Connect(const struct sockaddr* res) {
     WTF_LOG(INFO) << "Connect";
     uv_tcp_init(loop_, &socket_);
@@ -291,7 +297,7 @@ int SessionImplUV::DoInit() {
     SSL_set_connect_state(ssl_); //set to client mode
 
     SSL_CTX_set_verify(ssl_ctx_, SSL_VERIFY_PEER, dummy_ssl_verify_callback); // our callback always returns true, so no validation
-    SSL_CTX_set_info_callback(ssl_ctx_, dummy_ssl_info_callback);  // for dibugging
+    //SSL_CTX_set_info_callback(ssl_ctx_, dummy_ssl_info_callback);  // for debug
     SSL_CTX_set_msg_callback(ssl_ctx_, dummy_ssl_msg_callback);
 #endif
 
@@ -449,3 +455,4 @@ void SessionImplUV::SetBody(const body &body) {
 }
 
 } // namespace http
+} // namespace net

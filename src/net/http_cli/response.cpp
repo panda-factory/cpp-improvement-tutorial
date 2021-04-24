@@ -4,6 +4,7 @@
 
 #include "response.h"
 
+namespace net {
 namespace http {
 ResponseHandler::ResponseHandler(std::function<void(Response&&)> handler) : handler_(handler) {
 
@@ -28,3 +29,4 @@ void ResponseHandler::operator()(Response&& response) {
 }
 
 } // namespace http
+} // namespace net

@@ -10,16 +10,18 @@
 #include "method.h"
 #include "url.h"
 
-namespace http {
+
+namespace net {
 struct Request {
     void PreparePayload();
+
     Header header;
     Method method;
     Url url;
     unsigned short httpMajor = 1;
-    unsigned short httpMinor = 0;
+    unsigned short httpMinor = 1;
     std::string raw;
 };
-} // namespace http
+} // namespace net
 
 #endif //TEST_REQUEST_H

@@ -11,11 +11,11 @@
 
 #include <openssl/sha.h>
 
-#include "net/ws_cli/implement/ev/util.h"
+#include "net/ws_cli/util.h"
 #include "core/logging.h"
 #include "core/fmt_string.h"
 #include "core/scope_exit.h"
-#include "ws_header.h"
+#include "net/ws_cli/ws_header.h"
 #include "base64.h"
 
 #ifdef _WIN32
@@ -27,6 +27,7 @@
 
 #undef ERROR
 
+namespace net {
 namespace ws {
 namespace {
 bool CompareStrIgnoreCase(const std::string& a, const std::string& b)
@@ -342,8 +343,7 @@ int SessionImplEV::SetupConnectionTimeout() {
     return SetupTimeoutEvent(&connectTimeoutEvent_, &tv);
 }
 
-int SessionImplEV::DoConnect(const std::string& server, int port, const std::string& uri) {
-
+int SessionImplEV::DoConnect() {
     WTF_LOG(DEBUG) << "Connect start";
     if ((state_ != WSState::CLOSED_CLEANLY)
         && (state_ != WSState::CLOSED_UNCLEANLY)) {
@@ -351,14 +351,14 @@ int SessionImplEV::DoConnect(const std::string& server, int port, const std::str
         return -1;
     }
 
-    if (server.empty()) {
-        WTF_LOG(ERROR) << "NULL server given";
-        return -1;
-    }
+    //if (server.empty()) {
+    //    WTF_LOG(ERROR) << "NULL server given";
+    //    return -1;
+    //}
 
-    uri_ = uri;
-    host_ = server;
-    port_ = port;
+    uri_ = "/ajaxchattest";
+    host_ = "123.207.136.134";
+    port_ = 9091;
 
     receivedCloseFlag_ = false;
     sentCloseFlag_ = false;
@@ -370,7 +370,7 @@ int SessionImplEV::DoConnect(const std::string& server, int port, const std::str
     bev_ = bufferevent_socket_new(evBase_, -1, BEV_OPT_CLOSE_ON_FREE|BEV_OPT_DEFER_CALLBACKS);
     bufferevent_setcb(bev_, SessionImplEV::OnRead, SessionImplEV::OnWrite, SessionImplEV::OnEvent, this);
 
-    bufferevent_socket_connect_hostname(bev_, dnsBase_, AF_INET, server.c_str(), port);
+    bufferevent_socket_connect_hostname(bev_, dnsBase_, AF_INET, host_.c_str(), port_);
     state_ = WSState::CONNECTING;
 
     // Setup a timeout event for the connection attempt.
@@ -1863,10 +1863,16 @@ int SessionImplEV::ValidateHttpHeaders(const std::string& name, const std::strin
     return 0;
 }
 
-void SessionImplEV::SetHandler(const ConnectHandler& onConnect) {
-    onConnect_ = std::move(onConnect);
+void SessionImplEV::SetHandler(const ConnectHandler&& connect_handler) {
+    onConnect_ = std::move(connect_handler);
 }
-void SessionImplEV::SetHandler(const MessageHandler& onMessage) {
-    onMessage_ = std::move(onMessage);
+
+void SessionImplEV::SetHandler(const MessageHandler&& message_handler) {
+    onMessage_ = std::move(message_handler);
+}
+
+void SessionImplEV::SetUrl(const Url &url) {
+
 }
 } // namespace ws
+} // namespace net

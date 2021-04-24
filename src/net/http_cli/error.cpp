@@ -4,15 +4,17 @@
 
 #include "error.h"
 
+namespace net {
 namespace http {
 Error::Error() : code_{ErrorCode::OK} {
 
 }
+
 Error::Error(ErrorCode code) : code_{code} {
 
 }
 
-bool Error::operator== (const ErrorCode& code) const {
+bool Error::operator==(const ErrorCode &code) const {
     return code_ == code;
 }
 
@@ -22,8 +24,9 @@ Error::operator std::string() const {
     return ss.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const Error& err) {
+std::ostream &operator<<(std::ostream &os, const Error &err) {
     os << std::string(err);
     return os;
 }
 } // namespace http
+} // namespace net

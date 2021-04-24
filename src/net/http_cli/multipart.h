@@ -5,10 +5,12 @@
 #ifndef TEST_MULTIPART_H
 #define TEST_MULTIPART_H
 
+namespace net {
 namespace http {
 class Multipart {
 
 };
-} //namespace http
+} // namespace http
+} // namespace net
 
 #endif //TEST_MULTIPART_H

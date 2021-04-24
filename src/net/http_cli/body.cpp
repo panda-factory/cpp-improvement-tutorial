@@ -3,6 +3,8 @@
 //
 
 #include "body.h"
+namespace net {
 namespace http {
 
-} //namespace http
+} // namespace http
+} // namespace net
