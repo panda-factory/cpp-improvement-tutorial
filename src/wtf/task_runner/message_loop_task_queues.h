@@ -10,11 +10,10 @@
 
 #include "task_queue_id.h"
 #include "task.h"
-#include "task_source.h"
-#include "task_source_grade.h"
 #include "wakeable.h"
 #include "time/time_point.h"
 #include "wtf/macros.h"
+#include "delayed_task.h"
 
 namespace wtf {
 
@@ -23,13 +22,11 @@ public:
     using TaskObservers = std::map<intptr_t, wtf::Task>;
     Wakeable* wakeable;
     TaskObservers task_observers;
-    std::unique_ptr<TaskSource> task_source;
+    DelayedTaskQueue delayed_task_queue;
 
     TaskQueueId owner_of;
-    TaskQueueId subsumed_by;
-    TaskQueueId created_for;
 
-    explicit TaskQueueEntry(TaskQueueId created_for);
+    explicit TaskQueueEntry(TaskQueueId owner_of);
 
 private:
     WTF_DISALLOW_COPY_ASSIGN_AND_MOVE(TaskQueueEntry);
@@ -48,16 +45,13 @@ public:
 
     void RegisterTask(TaskQueueId queue_id,
                       const wtf::Task& task,
-                      wtf::TimePoint target_time,
-                      wtf::TaskSourceGrade task_source_grade = wtf::TaskSourceGrade::Unspecified);
+                      wtf::TimePoint target_time);
 
     bool HasPendingTasks(TaskQueueId queue_id) const;
 
     wtf::Task GetNextTaskToRun(TaskQueueId queue_id, wtf::TimePoint from_time);
 
     size_t GetNumPendingTasks(TaskQueueId queue_id) const;
-
-    static TaskSourceGrade GetCurrentTaskSourceGrade();
 
     void AddTaskObserver(TaskQueueId queue_id,
                          intptr_t key,
@@ -92,11 +86,9 @@ private:
 
     bool HasPendingTasksUnlocked(TaskQueueId queue_id) const;
 
-    TaskSource::TopTask PeekNextTaskUnlocked(TaskQueueId owner) const;
+    wtf::DelayedTask PeekNextTaskUnlocked(TaskQueueId owner) const;
 
     wtf::TimePoint GetNextWakeTimeUnlocked(TaskQueueId queue_id) const;
-
-    static std::mutex creation_mutex_;
 
     mutable std::mutex queue_mutex_;
     std::map<TaskQueueId, std::unique_ptr<TaskQueueEntry>> queue_entries_;

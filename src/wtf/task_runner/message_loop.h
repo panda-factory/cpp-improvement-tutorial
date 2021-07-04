@@ -32,7 +32,7 @@ public:
     /// this thread already.
     static bool IsInitializedForCurrentThread();
 
-    ~MessageLoop() = default;
+    ~MessageLoop() {};
 
     /// Gets the unique identifier for the TaskQueue associated with the current
     /// thread.

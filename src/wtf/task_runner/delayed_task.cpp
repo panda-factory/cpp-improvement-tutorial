@@ -7,12 +7,10 @@ namespace wtf {
 
 DelayedTask::DelayedTask(size_t order,
                          const wtf::Task& task,
-                         wtf::TimePoint target_time,
-                         wtf::TaskSourceGrade task_source_grade)
+                         wtf::TimePoint target_time)
         : order_(order),
           task_(task),
-          target_time_(target_time),
-          task_source_grade_(task_source_grade) {}
+          target_time_(target_time) {}
 
 const wtf::Task& DelayedTask::GetTask() const {
     return task_;
@@ -20,10 +18,6 @@ const wtf::Task& DelayedTask::GetTask() const {
 
 wtf::TimePoint DelayedTask::GetTargetTime() const {
     return target_time_;
-}
-
-wtf::TaskSourceGrade DelayedTask::GetTaskSourceGrade() const {
-    return task_source_grade_;
 }
 
 bool DelayedTask::operator>(const DelayedTask& other) const {

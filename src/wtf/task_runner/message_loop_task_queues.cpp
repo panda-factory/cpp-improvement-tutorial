@@ -11,30 +11,14 @@
 
 namespace wtf {
 
-class TaskSourceGradeHolder {
-public:
-    TaskSourceGrade task_source_grade;
-
-    explicit TaskSourceGradeHolder(TaskSourceGrade task_source_grade_arg)
-            : task_source_grade(task_source_grade_arg)
-    {}
-};
-
-WTF_THREAD_LOCAL std::unique_ptr<TaskSourceGradeHolder> tls_task_source_grade;
-
-
-std::mutex MessageLoopTaskQueues::creation_mutex_;
 const size_t TaskQueueId::unmerged = ULONG_MAX;
 static const TaskQueueId g_unmerged = TaskQueueId(TaskQueueId::unmerged);
 
-TaskQueueEntry::TaskQueueEntry(TaskQueueId created_for_arg)
-        : owner_of(g_unmerged),
-          subsumed_by(g_unmerged),
-          created_for(created_for_arg)
+TaskQueueEntry::TaskQueueEntry(TaskQueueId owner_of)
+        : owner_of(owner_of)
 {
     wakeable = NULL;
     task_observers = TaskObservers();
-    task_source = std::make_unique<TaskSource>(created_for);
 }
 
 MessageLoopTaskQueues *MessageLoopTaskQueues::GetInstance()
@@ -68,7 +52,6 @@ void MessageLoopTaskQueues::Dispose(TaskQueueId queue_id)
 {
     std::scoped_lock locker(queue_mutex_);
     const auto &queue_entry = queue_entries_.at(queue_id);
-    WTF_DCHECK(queue_entry->subsumed_by == g_unmerged);
     TaskQueueId subsumed = queue_entry->owner_of;
     queue_entries_.erase(queue_id);
     if (subsumed != g_unmerged) {
@@ -80,12 +63,7 @@ void MessageLoopTaskQueues::DisposeTasks(TaskQueueId queue_id)
 {
     std::lock_guard guard(queue_mutex_);
     const auto &queue_entry = queue_entries_.at(queue_id);
-    WTF_DCHECK(queue_entry->subsumed_by == g_unmerged);
-    TaskQueueId subsumed = queue_entry->owner_of;
-    queue_entry->task_source->ShutDown();
-    if (subsumed != g_unmerged) {
-        queue_entries_.at(subsumed)->task_source->ShutDown();
-    }
+    queue_entry->delayed_task_queue = {};
 }
 
 std::vector<wtf::Task> MessageLoopTaskQueues::GetObserversToNotify(
@@ -94,19 +72,8 @@ std::vector<wtf::Task> MessageLoopTaskQueues::GetObserversToNotify(
     std::lock_guard guard(queue_mutex_);
     std::vector<wtf::Task> observers;
 
-    if (queue_entries_.at(queue_id)->subsumed_by != g_unmerged) {
-        return observers;
-    }
-
     for (const auto &observer : queue_entries_.at(queue_id)->task_observers) {
         observers.push_back(observer.second);
-    }
-
-    TaskQueueId subsumed = queue_entries_.at(queue_id)->owner_of;
-    if (subsumed != g_unmerged) {
-        for (const auto &observer : queue_entries_.at(subsumed)->task_observers) {
-            observers.push_back(observer.second);
-        }
     }
 
     return observers;
@@ -119,7 +86,7 @@ wtf::Task MessageLoopTaskQueues::GetNextTaskToRun(TaskQueueId queue_id,
     if (!HasPendingTasksUnlocked(queue_id)) {
         return nullptr;
     }
-    TaskSource::TopTask top = PeekNextTaskUnlocked(queue_id);
+    wtf::DelayedTask top_task = PeekNextTaskUnlocked(queue_id);
 
     if (!HasPendingTasksUnlocked(queue_id)) {
         WakeUpUnlocked(queue_id, wtf::TimePoint::Max());
@@ -127,46 +94,31 @@ wtf::Task MessageLoopTaskQueues::GetNextTaskToRun(TaskQueueId queue_id,
         WakeUpUnlocked(queue_id, GetNextWakeTimeUnlocked(queue_id));
     }
 
-    if (top.task.GetTargetTime() > from_time) {
+    if (top_task.GetTargetTime() > from_time) {
         return nullptr;
     }
-    wtf::Task invocation = top.task.GetTask();
-    queue_entries_.at(top.task_queue_id)
-            ->task_source->PopTask(top.task.GetTaskSourceGrade());
-    {
-        std::scoped_lock creation(creation_mutex_);
-        const auto task_source_grade = top.task.GetTaskSourceGrade();
-        tls_task_source_grade.reset(new TaskSourceGradeHolder{task_source_grade});
-    }
+    wtf::Task invocation = top_task.GetTask();
+    queue_entries_.at(queue_id)
+            ->delayed_task_queue.pop();
     return invocation;
 }
 
 wtf::TimePoint MessageLoopTaskQueues::GetNextWakeTimeUnlocked(
         TaskQueueId queue_id) const
 {
-    return PeekNextTaskUnlocked(queue_id).task.GetTargetTime();
+    return PeekNextTaskUnlocked(queue_id).GetTargetTime();
 }
 
 bool MessageLoopTaskQueues::HasPendingTasksUnlocked(
         TaskQueueId queue_id) const
 {
     const auto &entry = queue_entries_.at(queue_id);
-    bool is_subsumed = entry->subsumed_by != g_unmerged;
-    if (is_subsumed) {
+    bool is_owner_of = entry->owner_of == g_unmerged;
+    if (is_owner_of) {
         return false;
     }
 
-    if (!entry->task_source->IsEmpty()) {
-        return true;
-    }
-
-    const TaskQueueId subsumed = entry->owner_of;
-    if (subsumed == g_unmerged) {
-        // this is not an owner and queue is empty.
-        return false;
-    } else {
-        return !queue_entries_.at(subsumed)->task_source->IsEmpty();
-    }
+    return !entry->delayed_task_queue.empty();
 }
 
 bool MessageLoopTaskQueues::Owns(TaskQueueId owner,
@@ -177,55 +129,25 @@ bool MessageLoopTaskQueues::Owns(TaskQueueId owner,
            subsumed == queue_entries_.at(owner)->owner_of;
 }
 
-TaskSource::TopTask MessageLoopTaskQueues::PeekNextTaskUnlocked(
+wtf::DelayedTask MessageLoopTaskQueues::PeekNextTaskUnlocked(
         TaskQueueId owner) const
 {
     WTF_DCHECK(HasPendingTasksUnlocked(owner));
     const auto &entry = queue_entries_.at(owner);
-    const TaskQueueId subsumed = entry->owner_of;
-    if (subsumed == g_unmerged) {
-        return entry->task_source->Top();
-    }
 
-    TaskSource *owner_tasks = entry->task_source.get();
-    TaskSource *subsumed_tasks = queue_entries_.at(subsumed)->task_source.get();
-
-    // we are owning another task queue
-    const bool subsumed_has_task = !subsumed_tasks->IsEmpty();
-    const bool owner_has_task = !owner_tasks->IsEmpty();
-    wtf::TaskQueueId top_queue_id = owner;
-    if (owner_has_task && subsumed_has_task) {
-        const auto owner_task = owner_tasks->Top();
-        const auto subsumed_task = subsumed_tasks->Top();
-        if (owner_task.task > subsumed_task.task) {
-            top_queue_id = subsumed;
-        } else {
-            top_queue_id = owner;
-        }
-    } else if (owner_has_task) {
-        top_queue_id = owner;
-    } else {
-        top_queue_id = subsumed;
-    }
-    return queue_entries_.at(top_queue_id)->task_source->Top();
+    return entry->delayed_task_queue.top();
 }
 
 void MessageLoopTaskQueues::RegisterTask(
         TaskQueueId queue_id,
         const wtf::Task &task,
-        wtf::TimePoint target_time,
-        wtf::TaskSourceGrade task_source_grade)
+        wtf::TimePoint target_time)
 {
     std::lock_guard guard(queue_mutex_);
     size_t order = order_++;
     const auto &queue_entry = queue_entries_.at(queue_id);
-    queue_entry->task_source->RegisterTask(
-            {order, task, target_time, task_source_grade});
+    queue_entry->delayed_task_queue.push({order, task, target_time});
     TaskQueueId loop_to_wake = queue_id;
-
-    if (queue_entry->subsumed_by != g_unmerged) {
-        loop_to_wake = queue_entry->subsumed_by;
-    }
 
     // This can happen when the secondary tasks are paused.
     if (HasPendingTasksUnlocked(loop_to_wake)) {

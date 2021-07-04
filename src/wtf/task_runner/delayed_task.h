@@ -8,7 +8,6 @@
 #include <queue>
 
 #include "task.h"
-#include "task_source_grade.h"
 #include "time/time_point.h"
 
 namespace wtf {
@@ -17,8 +16,7 @@ class DelayedTask {
 public:
     DelayedTask(size_t order,
                 const wtf::Task& task,
-                wtf::TimePoint target_time,
-                wtf::TaskSourceGrade task_source_grade);
+                wtf::TimePoint target_time);
 
     DelayedTask(const DelayedTask& other) = default;
 
@@ -28,15 +26,12 @@ public:
 
     wtf::TimePoint GetTargetTime() const;
 
-    wtf::TaskSourceGrade GetTaskSourceGrade() const;
-
     bool operator>(const DelayedTask& other) const;
 
 private:
     size_t order_;
     wtf::Task task_;
     wtf::TimePoint target_time_;
-    wtf::TaskSourceGrade task_source_grade_;
 
 };
 

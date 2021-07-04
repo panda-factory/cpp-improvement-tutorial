@@ -9,9 +9,7 @@
 #include <iostream>
 #include <thread>
 
-//#include "flutter/fml/sync/count_down_latch.h"
 #include "sync/waitable_event.h"
-#include "task_runner.h"
 #include "gtest/gtest.h"
 
 #define TIMESENSITIVE(x) TimeSensitiveTest_##x
@@ -21,135 +19,145 @@
 #define PLATFORM_SPECIFIC_CAPTURE(...) [__VA_ARGS__]
 #endif
 
-TEST(MessageLoop, GetCurrent) {
-  std::thread thread([]() {
-    wtf::MessageLoop::EnsureInitializedForCurrentThread();
-    ASSERT_TRUE(wtf::MessageLoop::GetCurrent().GetTaskRunner());
-  });
-  thread.join();
-}
-
-TEST(MessageLoop, DifferentThreadsHaveDifferentLoops) {
-  wtf::MessageLoop* loop1 = nullptr;
-  wtf::OneOffWaitableEvent latch1;
-  wtf::OneOffWaitableEvent term1;
-  std::thread thread1([&loop1, &latch1, &term1]() {
-    wtf::MessageLoop::EnsureInitializedForCurrentThread();
-    loop1 = &wtf::MessageLoop::GetCurrent();
-    latch1.Signal();
-    term1.Wait();
-  });
-
-  wtf::MessageLoop* loop2 = nullptr;
-  wtf::OneOffWaitableEvent latch2;
-  wtf::OneOffWaitableEvent term2;
-  std::thread thread2([&loop2, &latch2, &term2]() {
-    wtf::MessageLoop::EnsureInitializedForCurrentThread();
-    loop2 = &wtf::MessageLoop::GetCurrent();
-    latch2.Signal();
-    term2.Wait();
-  });
-  latch1.Wait();
-  latch2.Wait();
-  ASSERT_FALSE(loop1 == loop2);
-  term1.Signal();
-  term2.Signal();
-  thread1.join();
-  thread2.join();
-}
-
-TEST(MessageLoop, CanRunAndTerminate) {
-  bool started = false;
-  bool terminated = false;
-  std::thread thread([&started, &terminated]() {
-    wtf::MessageLoop::EnsureInitializedForCurrentThread();
-    auto& loop = wtf::MessageLoop::GetCurrent();
-    ASSERT_TRUE(loop.GetTaskRunner());
-    loop.GetTaskRunner()->PostTask([&terminated]() {
-      wtf::MessageLoop::GetCurrent().Terminate();
-      terminated = true;
+TEST(MessageLoop, GetCurrent)
+{
+    std::thread thread([]() {
+        wtf::MessageLoop::EnsureInitializedForCurrentThread();
+        ASSERT_TRUE(wtf::MessageLoop::GetCurrent().GetTaskRunner());
     });
-    loop.Run();
-    started = true;
-  });
-  thread.join();
-  ASSERT_TRUE(started);
-  ASSERT_TRUE(terminated);
+    thread.join();
 }
 
-TEST(MessageLoop, NonDelayedTasksAreRunInOrder) {
-  const size_t count = 100;
-  bool started = false;
-  bool terminated = false;
-  std::thread thread([&started, &terminated, count]() {
-    wtf::MessageLoop::EnsureInitializedForCurrentThread();
-    auto& loop = wtf::MessageLoop::GetCurrent();
-    size_t current = 0;
-    for (size_t i = 0; i < count; i++) {
-      loop.GetTaskRunner()->PostTask(
-          PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &current)() {
-            ASSERT_EQ(current, i);
-            current++;
-            if (count == i + 1) {
-              wtf::MessageLoop::GetCurrent().Terminate();
-              terminated = true;
-            }
-          });
-    }
-    loop.Run();
-    ASSERT_EQ(current, count);
-    started = true;
-  });
-  thread.join();
-  ASSERT_TRUE(started);
-  ASSERT_TRUE(terminated);
+TEST(MessageLoop, DifferentThreadsHaveDifferentLoops)
+{
+    wtf::MessageLoop *loop1 = nullptr;
+    wtf::OneOffWaitableEvent latch1;
+    wtf::OneOffWaitableEvent term1;
+    std::thread thread1([&loop1, &latch1, &term1]() {
+        wtf::MessageLoop::EnsureInitializedForCurrentThread();
+        loop1 = &wtf::MessageLoop::GetCurrent();
+        latch1.Signal();
+        term1.Wait();
+    });
+
+    wtf::MessageLoop *loop2 = nullptr;
+    wtf::OneOffWaitableEvent latch2;
+    wtf::OneOffWaitableEvent term2;
+    std::thread thread2([&loop2, &latch2, &term2]() {
+        wtf::MessageLoop::EnsureInitializedForCurrentThread();
+        loop2 = &wtf::MessageLoop::GetCurrent();
+        latch2.Signal();
+        term2.Wait();
+    });
+    latch1.Wait();
+    latch2.Wait();
+    ASSERT_FALSE(loop1 == loop2);
+    term1.Signal();
+    term2.Signal();
+    thread1.join();
+    thread2.join();
 }
 
-TEST(MessageLoop, DelayedTasksAtSameTimeAreRunInOrder) {
-  const size_t count = 100;
-  bool started = false;
-  bool terminated = false;
-  std::thread thread([&started, &terminated, count]() {
-    wtf::MessageLoop::EnsureInitializedForCurrentThread();
-    auto& loop = wtf::MessageLoop::GetCurrent();
-    size_t current = 0;
-    const auto now_plus_some =
-        wtf::TimePoint::Now() + wtf::TimeDelta::FromMilliseconds(2);
-    for (size_t i = 0; i < count; i++) {
-      loop.GetTaskRunner()->PostTaskForTime(
-          PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &current)() {
-            ASSERT_EQ(current, i);
-            current++;
-            if (count == i + 1) {
-              wtf::MessageLoop::GetCurrent().Terminate();
-              terminated = true;
-            }
-          },
-          now_plus_some);
-    }
-    loop.Run();
-    ASSERT_EQ(current, count);
-    started = true;
-  });
-  thread.join();
-  ASSERT_TRUE(started);
-  ASSERT_TRUE(terminated);
+TEST(MessageLoop, CanRunAndTerminate)
+{
+    bool started = false;
+    bool terminated = false;
+    std::thread thread([&started, &terminated]() {
+        wtf::MessageLoop::EnsureInitializedForCurrentThread();
+        auto &loop = wtf::MessageLoop::GetCurrent();
+        ASSERT_TRUE(loop.GetTaskRunner());
+        loop.GetTaskRunner()->PostTask([&terminated]() {
+            wtf::MessageLoop::GetCurrent().Terminate();
+            terminated = true;
+        });
+        loop.Run();
+        started = true;
+    });
+    thread.join();
+    ASSERT_TRUE(started);
+    ASSERT_TRUE(terminated);
 }
 
-TEST(MessageLoop, CheckRunsTaskOnCurrentThread) {
-  wtf::TaskRunner* runner;
-  wtf::OneOffWaitableEvent latch;
-  std::thread thread([&runner, &latch]() {
-    wtf::MessageLoop::EnsureInitializedForCurrentThread();
-    auto& loop = wtf::MessageLoop::GetCurrent();
-    runner = loop.GetTaskRunner();
-    latch.Signal();
-    ASSERT_TRUE(loop.GetTaskRunner()->RunsTasksOnCurrentThread());
-  });
-  latch.Wait();
-  ASSERT_TRUE(runner);
-  ASSERT_FALSE(runner->RunsTasksOnCurrentThread());
-  thread.join();
+TEST(MessageLoop, NonDelayedTasksAreRunInOrder)
+{
+    const size_t count = 100;
+    bool started = false;
+    bool terminated = false;
+    std::thread thread([&started, &terminated, count]() {
+        wtf::MessageLoop::EnsureInitializedForCurrentThread();
+        auto &loop = wtf::MessageLoop::GetCurrent();
+        size_t current = 0;
+        for (size_t i = 0; i < count; i++) {
+            loop.GetTaskRunner()->PostTask(
+                    PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &current)() {
+                        ASSERT_EQ(current, i);
+                        current++;
+                        if (count == i + 1) {
+                            wtf::MessageLoop::GetCurrent().Terminate();
+                            terminated = true;
+                        }
+                    });
+        }
+        loop.Run();
+        ASSERT_EQ(current, count);
+        started = true;
+    });
+    thread.join();
+    ASSERT_TRUE(started);
+    ASSERT_TRUE(terminated);
+}
+
+TEST(MessageLoop, DelayedTasksAtSameTimeAreRunInOrder)
+{
+    const size_t count = 100;
+    bool started = false;
+    bool terminated = false;
+    std::thread thread([&started, &terminated, count]() {
+        wtf::MessageLoop::EnsureInitializedForCurrentThread();
+        auto &loop = wtf::MessageLoop::GetCurrent();
+        size_t current = 0;
+        const auto now_plus_some =
+                wtf::TimePoint::Now() + wtf::TimeDelta::FromMilliseconds(2);
+        for (size_t i = 0; i < count; i++) {
+            loop.GetTaskRunner()->PostTaskForTime(
+                    PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &current)() {
+                        ASSERT_EQ(current, i);
+                        current++;
+                        if (count == i + 1) {
+                            wtf::MessageLoop::GetCurrent().Terminate();
+                            terminated = true;
+                        }
+                    },
+                    now_plus_some);
+        }
+        loop.Run();
+        ASSERT_EQ(current, count);
+        started = true;
+    });
+    thread.join();
+    ASSERT_TRUE(started);
+    ASSERT_TRUE(terminated);
+}
+
+TEST(MessageLoop, CheckRunsTaskOnCurrentThread)
+{
+    wtf::TaskRunner *runner;
+    wtf::OneOffWaitableEvent latch;
+    std::thread thread([&runner, &latch]() {
+        wtf::MessageLoop::EnsureInitializedForCurrentThread();
+        auto &loop = wtf::MessageLoop::GetCurrent();
+        runner = loop.GetTaskRunner();
+        latch.Signal();
+        loop.Run();
+        ASSERT_TRUE(loop.GetTaskRunner()->RunsTasksOnCurrentThread());
+    });
+    latch.Wait();
+    ASSERT_TRUE(runner);
+    ASSERT_FALSE(runner->RunsTasksOnCurrentThread());
+    runner->PostTask([]() {
+        wtf::MessageLoop::GetCurrent().Terminate();
+    });
+    thread.join();
 }
 
 TEST(MessageLoop, TIMESENSITIVE(SingleDelayedTaskByDelta)) {
