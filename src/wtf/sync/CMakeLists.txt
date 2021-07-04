@@ -1,0 +1,5 @@
+SET(SYNC_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/semaphore.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/waitable_event.cpp)
+
+ADD_LIBRARY(sync STATIC ${SYNC_SRC})

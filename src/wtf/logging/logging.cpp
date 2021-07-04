@@ -11,6 +11,11 @@
 #include <android/log.h>
 #elif defined(OS_IOS)
 #include <syslog.h>
+#elif defined(OS_WIN)
+#include <windows.h>
+#ifdef max
+#undef max
+#endif
 #endif
 
 #include "log_setting.h"
@@ -50,7 +55,7 @@ LogMessage::LogMessage(LogSeverity severity,
                        int line,
                        const char* condition)
         : severity_(severity), file_(file), line_(line) {
-    stream_ << "[";
+    stream_ << "[" << ::GetCurrentThreadId() << "] [";
     if (severity >= LOG_INFO) {
         stream_ << GetNameForLogSeverity(severity);
     } else {

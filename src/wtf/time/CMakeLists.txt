@@ -1,0 +1,4 @@
+SET(TIME_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/time_point.cpp)
+
+ADD_LIBRARY(timepoint STATIC ${TIME_SRC})

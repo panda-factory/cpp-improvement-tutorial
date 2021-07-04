@@ -42,7 +42,7 @@ enum class WSState {
     CONNECTED
 };
 enum class WSCloseStatus {
-    /// 1000 indicates a normal closure, meaning that the purpose for
+    /// 1000 indicates a normal TaskType, meaning that the purpose for
     /// which the connection was established has been fulfilled.
     NORMAL_1000 = 1000,
 

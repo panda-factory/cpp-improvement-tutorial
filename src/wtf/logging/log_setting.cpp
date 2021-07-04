@@ -44,4 +44,4 @@ ScopedSetLogSettings::~ScopedSetLogSettings() {
     SetLogSettings(old_settings_);
 }
 
-}  // namespace fml
+}  // namespace wtf
