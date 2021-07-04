@@ -75,7 +75,6 @@ void MessageLoopImpl::DoTerminate()
 
 void MessageLoopImpl::FlushTasks(FlushType type)
 {
-    //TRACE_EVENT0("fml", "MessageLoop::FlushTasks");
 
     const auto now = wtf::TimePoint::Now();
     wtf::Task invocation;
