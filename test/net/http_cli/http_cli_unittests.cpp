@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
-#include "core/log_setting.h"
+#include "wtf/logging/log_setting.h"
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

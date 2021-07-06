@@ -17,7 +17,7 @@ IF(GTESTSRC_FOUND)
     SET(GTEST_LIBRARIES gtest gtest_main)
 
     #add_custom_target(tests ALL)
-    #ADD_SUBDIRECTORY(net/http_cli)
+    ADD_SUBDIRECTORY(net/http_cli)
     #ADD_SUBDIRECTORY(net/ws_cli)
     #ADD_SUBDIRECTORY(pipeline)
     ADD_SUBDIRECTORY(wtf/sync)

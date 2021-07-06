@@ -3,8 +3,8 @@
 //
 
 #include "request.h"
-#include "core/fmt_string.h"
-#include "core/logging.h"
+#include "wtf/fmt_string.h"
+#include "wtf/logging/logging.h"
 
 namespace net {
 void Request::PreparePayload() {

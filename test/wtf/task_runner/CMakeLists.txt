@@ -7,8 +7,8 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/wtf)
 
 SET(TASK_RUNNER_TEST_SRC
     ${TASK_RUNNER_TEST_DIR}/message_loop_unittests.cpp
-    #${TASK_RUNNER_TEST_DIR}/thread_local_unittests.cpp
-    #${TASK_RUNNER_TEST_DIR}/platform/win/message_loop_win_unittests.cpp
+    ${TASK_RUNNER_TEST_DIR}/thread_local_unittests.cpp
+    ${TASK_RUNNER_TEST_DIR}/platform/win/message_loop_win_unittests.cpp
     )
 
 ADD_EXECUTABLE(task_runner_unittests ${TASK_RUNNER_TEST_SRC})

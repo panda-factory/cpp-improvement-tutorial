@@ -5,6 +5,7 @@
 #ifndef TEST_COOKIES_H
 #define TEST_COOKIES_H
 #include <map>
+#include <string>
 namespace net {
 namespace http {
 struct Cookies {

@@ -7,7 +7,7 @@
 
 #include <functional>
 
-#include "core/macros.h"
+#include "wtf/macros.h"
 #include "net/http_cli/cookies.h"
 #include "net/http_cli/error.h"
 #include "net/header.h"

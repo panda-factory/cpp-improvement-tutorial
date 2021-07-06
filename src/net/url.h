@@ -6,7 +6,7 @@
 #define TEST_URL_H
 #include <string>
 
-#include "core/macros.h"
+#include "wtf/macros.h"
 
 namespace net {
 struct Url {

@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "session.h"
-#include "core/logging.h"
+#include "wtf/logging/logging.h"
 
 #if __ENABLE_HTTPS__
 TEST(SessionTest, Session_GET_HTTPS_BAIDU) {

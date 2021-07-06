@@ -13,7 +13,7 @@ ADD_EXECUTABLE(http_cli_unittests ${HTTP_CLI_TEST_SRC})
 
 TARGET_LINK_LIBRARIES(http_cli_unittests PRIVATE
     ${GTEST_LIBRARIES}
-    core
+    logging
     http_cli
     ${OPENSSL_LIBRARIES} ws2_32.lib winmm.lib wldap32.lib)
 

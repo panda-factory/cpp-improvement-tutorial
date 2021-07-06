@@ -4,8 +4,8 @@
 
 #include "session_impl_uv.h"
 
-#include "core/logging.h"
-#include "core/fmt_string.h"
+#include "wtf/logging/logging.h"
+#include "wtf/fmt_string.h"
 
 #if __ENABLE_HTTPS__
 #include <openssl/bio.h>
@@ -25,6 +25,7 @@ namespace net {
 namespace http {
 namespace {
 
+#if __ENABLE_HTTPS__
 #define WHERE_INFO(ssl, w, flag, msg) { \
     if(w & flag) { \
       printf("\t"); \
@@ -77,6 +78,7 @@ int dummy_ssl_verify_callback(int ok, X509_STORE_CTX* store) {
 
     return 1;  // We always return 1, so no verification actually
 }
+#endif // __ENABLE_HTTPS__
 }
 // | static | uv |
 void SessionImplUV::OnAlloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
@@ -297,13 +299,14 @@ int SessionImplUV::DoInit() {
     SSL_set_connect_state(ssl_); //set to client mode
 
     SSL_CTX_set_verify(ssl_ctx_, SSL_VERIFY_PEER, dummy_ssl_verify_callback); // our callback always returns true, so no validation
-    //SSL_CTX_set_info_callback(ssl_ctx_, dummy_ssl_info_callback);  // for debug
+    SSL_CTX_set_info_callback(ssl_ctx_, dummy_ssl_info_callback);  // for debug
     SSL_CTX_set_msg_callback(ssl_ctx_, dummy_ssl_msg_callback);
 #endif
 
     return 0;
 }
 
+#if __ENABLE_HTTPS__
 void SessionImplUV::FlushReadBio() {
     char buf[1024*16];
     int bytes_read = 0;
@@ -322,7 +325,7 @@ void SessionImplUV::HandleError(int result) {
         WTF_LOG(FATAL) << "Need to specify more error code.";
     }
 }
-
+#endif // __ENABLE_HTTPS__
 int SessionImplUV::OnRecvBody(const char *p, size_t len) {
     bodyStream_ << std::string(p, len);
     return 0;

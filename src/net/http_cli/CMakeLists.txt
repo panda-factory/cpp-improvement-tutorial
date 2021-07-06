@@ -33,5 +33,5 @@ ADD_SUBDIRECTORY(implement)
 
 ADD_LIBRARY(http_cli STATIC ${HTTP_CLI_SRC})
 
-TARGET_LINK_LIBRARIES(http_cli PRIVATE http_cli_impl)
+TARGET_LINK_LIBRARIES(http_cli PRIVATE http_cli_impl logging)
 

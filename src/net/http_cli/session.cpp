@@ -4,7 +4,7 @@
 
 #include "session.h"
 
-#include "core/macros.h"
+#include "wtf/macros.h"
 
 #if (__USE_BEAST__)
 #include "implement/beast/session_impl_beast.h"
